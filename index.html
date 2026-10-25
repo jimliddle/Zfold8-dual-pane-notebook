@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1A1D24">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FoldFolio">
+    <link id="pwaFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231A1D24'/%3E%3Crect x='76' y='56' width='360' height='400' rx='36' fill='%23FFFFFF' stroke='%23D6D3D1' stroke-width='12'/%3E%3Crect x='76' y='56' width='54' height='400' rx='16' fill='%2327272A'/%3E%3Crect x='346' y='48' width='34' height='416' fill='%23F59E0B'/%3E%3Cpath d='M230 56v130l28-22 28 22V56z' fill='%23991B1B'/%3E%3Cline x1='164' y1='176' x2='316' y2='176' stroke='%2394A3B8' stroke-width='14' stroke-linecap='round'/%3E%3Cline x1='164' y1='236' x2='316' y2='236' stroke='%2394A3B8' stroke-width='14' stroke-linecap='round'/%3E%3Cline x1='164' y1='296' x2='276' y2='296' stroke='%2394A3B8' stroke-width='14' stroke-linecap='round'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231A1D24'/%3E%3Crect x='76' y='56' width='360' height='400' rx='36' fill='%23FFFFFF' stroke='%23D6D3D1' stroke-width='12'/%3E%3Crect x='76' y='56' width='54' height='400' rx='16' fill='%2327272A'/%3E%3Crect x='346' y='48' width='34' height='416' fill='%23F59E0B'/%3E%3Cpath d='M230 56v130l28-22 28 22V56z' fill='%23991B1B'/%3E%3C/svg%3E">
+    <link id="pwaManifestLink" rel="manifest" href="">
+    <title>FoldFolio — Full-Bleed Notebook for Galaxy Z Fold 8</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 10 Curated Handwritten & Editorial Typefaces (TypeDraw Style) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Gloria+Hallelujah&family=Homemade+Apple&family=Indie+Flower&family=Kalam:wght@400;700&family=Nanum+Pen+Script&family=Patrick+Hand&family=Reenie+Beanie&family=Shadows+Into+Light&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Tone.js for Realistic Paper & Pen Acoustics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- PDF.js for Interactive PDF Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <style>
+        :root {
+            --paper-bg: #FFFFFF;
+            --paper-line: rgba(148, 163, 184, 0.26);
+            --paper-margin: rgba(239, 68, 68, 0.28);
+            --cover-color: #1A1D24;
+            --ink-primary: #1E293B;
+            --font-note: 'Caveat', cursive;
+            --font-size-note: 26px;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input, textarea, [contenteditable="true"] {
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: var(--cover-color);
+            font-family: 'Patrick Hand', sans-serif;
+            touch-action: none;
+        }
+
+        /* Fine Grain Leather Rim around the outermost 4px of the screen */
+        .leather-rim {
+            background-color: var(--cover-color);
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0),
+                radial-gradient(rgba(0, 0, 0, 0.35) 1px, transparent 0);
+            background-size: 4px 4px;
+            background-position: 0 0, 2px 2px;
+        }
+
+        /* Realistic Multi-Sheet Stacked Paper Edges on Outer Borders */
+        .paper-stack-left {
+            border-left: 6px solid #e2e8f0;
+            box-shadow:
+                inset 2px 0 0 #ffffff,
+                inset 4px 0 0 #cbd5e1,
+                inset 6px 0 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .paper-stack-right {
+            border-right: 6px solid #e2e8f0;
+            box-shadow:
+                inset -2px 0 0 #ffffff,
+                inset -4px 0 0 #cbd5e1,
+                inset -6px 0 12px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Paper Texture & Rulings */
+        .paper-surface {
+            background-color: var(--paper-bg);
+            color: var(--ink-primary);
+            position: relative;
+            transition: background-color 0.25s ease;
+        }
+
+        /* Subtle organic paper fiber noise overlay */
+        .paper-surface::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.035;
+            background-image: radial-gradient(#000 0.65px, transparent 0.65px);
+            background-size: 5px 5px;
+            z-index: 1;
+        }
+
+        .paper-ruled {
+            background-image: linear-gradient(to bottom, transparent 35px, var(--paper-line) 36px);
+            background-size: 100% 36px;
+        }
+
+        .paper-dotted {
+            background-image: radial-gradient(var(--paper-line) 1.6px, transparent 1.6px);
+            background-size: 26px 26px;
+        }
+
+        .paper-grid {
+            background-image:
+                linear-gradient(to right, var(--paper-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--paper-line) 1px, transparent 1px);
+            background-size: 26px 26px;
+        }
+
+        .paper-blank {
+            background-image: none;
+        }
+
+        /* Deep Realistic Book Spine Crease & Ambient Occlusion */
+        .crease-shadow-left {
+            background: linear-gradient(to right,
+                rgba(0,0,0,0) 76%,
+                rgba(30,20,10,0.03) 86%,
+                rgba(20,15,10,0.11) 94%,
+                rgba(10,8,5,0.28) 98.5%,
+                rgba(0,0,0,0.48) 100%);
+        }
+
+        .crease-shadow-right {
+            background: linear-gradient(to left,
+                rgba(0,0,0,0) 76%,
+                rgba(30,20,10,0.03) 86%,
+                rgba(20,15,10,0.11) 94%,
+                rgba(10,8,5,0.28) 98.5%,
+                rgba(0,0,0,0.48) 100%);
+        }
+
+        /* Handwritten Note Editor */
+        .handwriting-area {
+            font-family: var(--font-note);
+            font-size: var(--font-size-note);
+            line-height: 36px;
+            color: var(--ink-primary);
+            background: transparent;
+            outline: none;
+            resize: none;
+            border: none;
+        }
+
+        /* Interactive Elastic Band on Closed Cover */
+        .elastic-strap {
+            width: 34px;
+            background: repeating-linear-gradient(
+                0deg,
+                #18181b,
+                #18181b 2px,
+                #27272a 2px,
+                #27272a 4px
+            );
+            box-shadow:
+                -4px 0 12px rgba(0,0,0,0.6),
+                4px 0 12px rgba(0,0,0,0.6),
+                inset 0 0 4px rgba(255,255,255,0.08);
+            cursor: grab;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .elastic-strap:active {
+            cursor: grabbing;
+        }
+
+        /* 3D Hardcover Unfolding Stage & Spine Ridges */
+        .cover-stage-3d {
+            perspective: 2800px;
+            transform-style: preserve-3d;
+        }
+
+        .hardcover-leaf-3d {
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: transform 0.78s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .cover-front-face {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background-color: var(--cover-color);
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 0),
+                radial-gradient(rgba(0, 0, 0, 0.42) 1px, transparent 0),
+                linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.28) 100%);
+            background-size: 4px 4px, 4px 4px, 100% 100%;
+            background-position: 0 0, 2px 2px, 0 0;
+            box-shadow:
+                0 30px 60px -12px rgba(0, 0, 0, 0.75),
+                inset 0 1px 2px rgba(255, 255, 255, 0.18),
+                inset -4px 0 10px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Inside Front Cover (Ex-Libris Flyleaf visible while swinging open) */
+        .cover-inside-face {
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background-color: #EFE8D8;
+            background-image: radial-gradient(#b8ab93 0.75px, transparent 0.75px);
+            background-size: 12px 12px;
+            box-shadow: inset -24px 0 36px rgba(0,0,0,0.22);
+        }
+
+        /* Realistic Book Spine Groove & Raised Hub Ridges */
+        .book-spine-groove {
+            background: linear-gradient(to right,
+                rgba(0,0,0,0.65) 0%,
+                rgba(255,255,255,0.12) 22%,
+                rgba(0,0,0,0.52) 55%,
+                rgba(255,255,255,0.06) 80%,
+                rgba(0,0,0,0.4) 100%);
+        }
+
+        /* Visible Multi-Page Fore-Edge Stack Under the Hardcover Lip */
+        .closed-book-fore-edge {
+            background: repeating-linear-gradient(
+                to right,
+                #ffffff 0px,
+                #e2e8f0 1.5px,
+                #f8fafc 3px
+            );
+            box-shadow: inset 3px 0 8px rgba(0,0,0,0.28), 8px 12px 28px rgba(0,0,0,0.55);
+        }
+
+        /* Physical Top Index Tabs Sticking Out of the Paper Edge */
+        .book-index-tab {
+            padding: 5px 12px 7px 12px;
+            border-radius: 0 0 10px 10px;
+            font-family: 'Patrick Hand', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.03em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+            transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+        .book-index-tab:hover {
+            transform: translateY(2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+        }
+
+        /* Pull-Down Top Drawer for Pure Paper Mode */
+        #topTabsDrawer {
+            transform: translateY(-100%);
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #topTabsDrawer.drawer-open {
+            transform: translateY(0%);
+        }
+
+        /* Pull-Up Bottom Pen Pill for Pure Paper Mode */
+        #bottomPenDrawer {
+            transform: translateY(150%);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+        }
+        #bottomPenDrawer.drawer-open {
+            transform: translateY(0%);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Resize Corner Handle for Taped Web & PDF Clippings */
+        .clipping-resize-handle {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 22px;
+            height: 22px;
+            cursor: nwse-resize;
+            touch-action: none;
+            z-index: 30;
+            background: linear-gradient(135deg, transparent 50%, rgba(100, 116, 139, 0.45) 50%, rgba(15, 23, 42, 0.75) 100%);
+            border-bottom-right-radius: 10px;
+        }
+
+        /* Dynamic Interactive Page-Curl Leaf & Curled Backside Gradient */
+        #interactiveCurlStage {
+            perspective: 2600px;
+            transform-style: preserve-3d;
+        }
+
+        .curl-leaf {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            transform-style: preserve-3d;
+            z-index: 70;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .curl-leaf-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            overflow: hidden;
+            background-color: var(--paper-bg);
+            box-shadow: -15px 0 35px rgba(0, 0, 0, 0.25), 15px 0 35px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Realistic curved paper cylindrical highlight on the turning backside */
+        .curl-leaf-back {
+            transform: rotateY(180deg);
+            background-image: linear-gradient(
+                to right,
+                rgba(0,0,0,0.22) 0%,
+                rgba(255,255,255,0.65) 18%,
+                rgba(255,255,255,0.05) 48%,
+                rgba(0,0,0,0.10) 85%,
+                rgba(0,0,0,0.32) 100%
+            );
+        }
+
+        /* Dynamic ambient shadow cast onto the spread while a page is mid-turn */
+        #curlCastShadow {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 65;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.28), transparent 70%);
+        }
+
+        /* Interactive Corner Curl Peeks */
+        .corner-curl-zone-right {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 78px;
+            height: 78px;
+            z-index: 45;
+            cursor: pointer;
+            touch-action: none;
+            background: linear-gradient(
+                135deg,
+                transparent 46%,
+                rgba(0,0,0,0.12) 48%,
+                rgba(255,255,255,0.92) 60%,
+                #cbd5e1 100%
+            );
+            border-top-left-radius: 18px;
+            box-shadow: -5px -5px 14px rgba(0,0,0,0.16);
+            transition: width 0.22s ease, height 0.22s ease, box-shadow 0.22s ease;
+        }
+        .corner-curl-zone-right:hover {
+            width: 104px;
+            height: 104px;
+            box-shadow: -8px -8px 20px rgba(0,0,0,0.24);
+        }
+
+        .corner-curl-zone-left {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 78px;
+            height: 78px;
+            z-index: 45;
+            cursor: pointer;
+            touch-action: none;
+            background: linear-gradient(
+                225deg,
+                transparent 46%,
+                rgba(0,0,0,0.12) 48%,
+                rgba(255,255,255,0.92) 60%,
+                #cbd5e1 100%
+            );
+            border-top-right-radius: 18px;
+            box-shadow: 5px -5px 14px rgba(0,0,0,0.16);
+            transition: width 0.22s ease, height 0.22s ease, box-shadow 0.22s ease;
+        }
+        .corner-curl-zone-left:hover {
+            width: 104px;
+            height: 104px;
+            box-shadow: 8px -8px 20px rgba(0,0,0,0.24);
+        }
+
+        /* Polaroid / taped paper clip style for Web & PDF embeds */
+        .taped-clipping {
+            box-shadow: 0 12px 28px -6px rgba(30, 25, 20, 0.28), 0 0 0 1px rgba(120, 105, 85, 0.25);
+        }
+        .washi-tape {
+            width: 78px;
+            height: 20px;
+            background: rgba(235, 210, 145, 0.65);
+            backdrop-filter: blur(2px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            transform: rotate(-2.5deg);
+        }
+
+        /* Custom subtle scrollbars */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(120, 113, 108, 0.25); border-radius: 9999px; }
+    </style>
+</head>
+<body class="leather-rim p-[3px] sm:p-[5px] flex items-center justify-center">
+
+    <!-- ========================================================================= -->
+    <!-- 1. 3D INTERACTIVE FRONT NOTEBOOK COVER (SWIPE COVER OR SNAP ELASTIC BAND) -->
+    <!-- ========================================================================= -->
+    <div id="closedCoverScreen" class="w-full h-full fixed inset-0 z-50 cover-stage-3d flex items-center justify-center p-3 sm:p-6 bg-stone-950/85 backdrop-blur-md transition-opacity duration-500">
+
+        <!-- Closed Book Chassis with Visible Page Stack on Right Edge -->
+        <div class="relative w-full max-w-[490px] h-[88dvh] flex items-center justify-center select-none">
+
+            <!-- Underlying Page Block Preview (Revealed as the 3D cover swings open!) -->
+            <div class="absolute inset-y-2 left-3 right-0 rounded-r-3xl rounded-l-md closed-book-fore-edge flex items-center justify-center pr-3">
+                <div class="w-full h-full paper-surface paper-ruled rounded-r-2xl p-8 flex flex-col justify-between opacity-95 shadow-inner">
+                    <div class="border-b border-stone-400/30 pb-2 flex justify-between items-center">
+                        <span id="underCoverPreviewTitle" class="handwriting-area font-bold text-2xl text-stone-700">Page 1</span>
+                        <span class="text-xs font-mono text-stone-400">01</span>
+                    </div>
+                    <p id="underCoverPreviewText" class="handwriting-area text-stone-400 line-clamp-6"></p>
+                    <div class="text-[11px] font-mono text-stone-400 uppercase tracking-widest">Opening Spread...</div>
+                </div>
+            </div>
+
+            <!-- 3D Hinged Hardcover Leaf (Drag cover left or pull elastic strap to open) -->
+            <div id="hardcoverLeaf3D"
+                 onpointerdown="startCoverDragToOpen(event)"
+                 class="hardcover-leaf-3d relative w-[96%] h-full mr-auto rounded-r-3xl rounded-l-lg cursor-grab active:cursor-grabbing">
+
+                <!-- FRONT FACE OF HARDCOVER -->
+                <div class="cover-front-face absolute inset-0 rounded-r-3xl rounded-l-lg flex flex-col justify-between p-7 sm:p-10 overflow-hidden">
+
+                    <!-- Sculpted Left Book Spine Groove & Stitched Seam -->
+                    <div class="book-spine-groove absolute inset-y-0 left-0 w-9 z-20 pointer-events-none flex flex-col justify-evenly items-center">
+                        <div class="w-full h-[2px] bg-black/50 shadow-sm"></div>
+                        <div class="w-full h-[2px] bg-black/50 shadow-sm"></div>
+                        <div class="w-full h-[2px] bg-black/50 shadow-sm"></div>
+                        <div class="w-full h-[2px] bg-black/50 shadow-sm"></div>
+                    </div>
+                    <div class="absolute inset-y-3 left-10 border-l border-dashed border-amber-200/20 pointer-events-none z-20"></div>
+
+                    <!-- Gold Foil Peripheral Stitch Frame -->
+                    <div class="absolute inset-4 left-12 border border-amber-300/25 rounded-r-2xl rounded-l-sm pointer-events-none"></div>
+
+                    <!-- Top Row: Cover Leather Swatches & Foil Badge -->
+                    <div class="relative z-30 pl-6 flex items-center justify-between" onpointerdown="event.stopPropagation()">
+                        <div class="flex items-center gap-1.5 bg-black/35 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10">
+                            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-200/80 mr-1">Cover</span>
+                            <button onclick="setCoverColor('#1A1D24')" class="w-4 h-4 rounded-full bg-[#1A1D24] ring-1 ring-white/50" title="Obsidian Leather"></button>
+                            <button onclick="setCoverColor('#3E2723')" class="w-4 h-4 rounded-full bg-[#3E2723] ring-1 ring-white/40" title="Espresso Saddle"></button>
+                            <button onclick="setCoverColor('#5D1916')" class="w-4 h-4 rounded-full bg-[#5D1916] ring-1 ring-white/40" title="Oxblood Bordeaux"></button>
+                            <button onclick="setCoverColor('#1B3B2B')" class="w-4 h-4 rounded-full bg-[#1B3B2B] ring-1 ring-white/40" title="British Racing Green"></button>
+                            <button onclick="setCoverColor('#1E293B')" class="w-4 h-4 rounded-full bg-[#1E293B] ring-1 ring-white/40" title="Midnight Navy Linen"></button>
+                        </div>
+                        <span id="coverBadgePages" class="text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full bg-amber-400/15 text-amber-200 border border-amber-300/30">
+                            2 PAGES
+                        </span>
+                    </div>
+
+                    <!-- Embossed Paper Label Plate (Like TypeDraw / Moleskine) -->
+                    <div class="relative z-30 ml-6 bg-white text-stone-900 p-6 rounded-2xl shadow-2xl border-2 border-slate-200 max-w-[335px] transform -rotate-[0.6deg]"
+                         onpointerdown="event.stopPropagation()">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-700/60 absolute top-2.5 left-2.5"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-700/60 absolute top-2.5 right-2.5"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-700/60 absolute bottom-2.5 left-2.5"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-700/60 absolute bottom-2.5 right-2.5"></span>
+
+                        <div class="text-[10px] font-mono uppercase tracking-widest text-stone-400 mb-1 flex items-center justify-between">
+                            <span>EX LIBRIS • FIELD FOLIO</span>
+                            <span class="text-amber-700 font-bold">FOLD 8</span>
+                        </div>
+                        <input id="coverTitleInput" type="text" value="Galaxy Z Fold 8 Journal"
+                            onchange="updateMeta('title', this.value)"
+                            class="w-full bg-transparent text-2xl sm:text-3xl font-bold text-stone-900 outline-none border-b border-stone-300 pb-1"
+                            style="font-family: var(--font-note);" />
+                        <div class="mt-2.5 flex items-center justify-between text-[11px] text-stone-500">
+                            <span>Local IndexedDB Vault</span>
+                            <span class="font-mono text-stone-600">10 Fonts • Pen</span>
+                        </div>
+                    </div>
+
+                    <!-- Cover Quick-Jotter Sticky Card -->
+                    <div class="relative z-30 ml-6 bg-black/45 backdrop-blur-md border border-white/15 rounded-2xl p-4 max-w-[335px] text-slate-200"
+                         onpointerdown="event.stopPropagation()">
+                        <div class="text-xs font-semibold text-amber-300 mb-1 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5"><i data-lucide="pen-line" class="w-3.5 h-3.5"></i> Cover Quick-Jot</span>
+                            <span class="text-[10px] text-stone-400">Drops right inside</span>
+                        </div>
+                        <textarea id="coverQuickInput" rows="2" placeholder="Jot a note or task before opening..."
+                            class="w-full bg-transparent text-xs sm:text-sm text-white placeholder-slate-400 outline-none resize-none"></textarea>
+                        <div class="flex justify-end gap-2 mt-1.5 pt-1.5 border-t border-white/10">
+                            <button onclick="saveCoverJot('todo')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs transition">+ Checklist</button>
+                            <button onclick="saveCoverJot('note')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs transition">+ Page 1</button>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Interactive Gesture Prompt -->
+                    <div class="relative z-30 pl-6 flex items-center justify-between text-xs text-amber-100/80">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
+                            <span>Pull strap left/right or swipe cover to open</span>
+                        </div>
+                    </div>
+
+                    <!-- INTERACTIVE 3D ELASTIC STRAP (Pull left or right, or tap to snap open!) -->
+                    <div id="elasticStrap"
+                         onpointerdown="startElasticPull(event)"
+                         class="elastic-strap absolute top-0 bottom-0 right-9 z-40 flex flex-col items-center justify-center group touch-none select-none"
+                         title="Pull elastic strap left or right, or tap to snap open">
+                        <div id="elasticLabelPill" class="px-1.5 py-3 rounded-full bg-amber-400/25 border border-amber-300/50 text-amber-100 text-[10px] font-mono tracking-widest uppercase rotate-90 whitespace-nowrap shadow-md group-hover:bg-amber-400 group-hover:text-stone-950 transition pointer-events-none">
+                            ⟵ Pull Strap ⟶
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INSIDE BACKFACE OF FRONT COVER (Revealed during 3D swing open) -->
+                <div class="cover-inside-face absolute inset-0 rounded-l-3xl rounded-r-lg p-10 flex flex-col justify-between">
+                    <div class="border-2 border-stone-400/50 rounded-2xl p-6 bg-[#FBF8F1]/90 shadow-inner text-center my-auto">
+                        <div class="text-[10px] font-mono uppercase tracking-widest text-stone-400">EX LIBRIS</div>
+                        <div class="handwriting-area text-2xl font-bold text-stone-800 mt-1">Samsung Galaxy Z Fold 8</div>
+                        <div class="text-xs text-stone-500 mt-1">Private Local IndexedDB Edition</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 2. FULL-BLEED OPEN DUAL-PAGE NOTEBOOK (100% VIEWPORT PAPER EXPERIENCE)    -->
+    <!-- ========================================================================= -->
+    <main id="interactiveCurlStage" class="w-full h-full relative rounded-xl overflow-hidden flex flex-col md:flex-row shadow-2xl">
+
+        <!-- RETRACTABLE PULL-DOWN TOP PAPER TABS BAR ("PURE PAPER" AESTHETIC) -->
+        <div class="absolute top-0 inset-x-0 z-50 pointer-events-none flex flex-col items-center">
+
+            <!-- Hidden-by-default Top Tabs Bar that slides down when pulled or tapped -->
+            <div id="topTabsDrawer" class="w-full px-3 sm:px-8 pointer-events-auto flex items-start justify-between bg-gradient-to-b from-stone-950/35 to-transparent pb-2 pt-0">
+                <!-- Left Paper Edge Tabs -->
+                <div class="flex flex-wrap items-start gap-1.5">
+                    <button onclick="toggleCoverView(true); toggleTopTabsBar(false)" class="book-index-tab bg-stone-900 text-amber-100 flex items-center gap-1.5" title="Close Notebook Cover">
+                        <i data-lucide="book" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>Cover</span>
+                    </button>
+                    <button onclick="openIndexModal(); toggleTopTabsBar(false)" class="book-index-tab bg-white text-stone-900 border border-stone-300 flex items-center gap-1.5" title="Table of Contents, New Note Section & Export (.md / .txt)">
+                        <i data-lucide="list-tree" class="w-3.5 h-3.5 text-amber-900"></i>
+                        <span>Index & Share</span>
+                    </button>
+                    <button onclick="openModal('customizerModal'); toggleTopTabsBar(false)" class="book-index-tab bg-amber-50 text-amber-950 border border-amber-300 flex items-center gap-1.5" title="Customize Paper, Handwriting Font & Ink">
+                        <i data-lucide="type" class="w-3.5 h-3.5 text-amber-800"></i>
+                        <span>Paper & Fonts</span>
+                    </button>
+                    <button onclick="toggleAudioAcoustics()" id="tabAudioBtn" class="book-index-tab bg-stone-100 text-stone-700 border border-stone-300 flex items-center gap-1" title="Toggle Paper & Pen Sounds">
+                        <i data-lucide="volume-2" class="w-3.5 h-3.5" id="tabAudioIcon"></i>
+                    </button>
+                </div>
+
+                <!-- Right Paper Edge Tabs (Web/PDF Insert, Gemini AI, Fullscreen, IndexedDB Vault) -->
+                <div class="flex flex-wrap items-start justify-end gap-1.5">
+                    <button onclick="openInsertModal('left', 'url'); toggleTopTabsBar(false)" class="book-index-tab bg-sky-50 text-sky-950 border border-sky-300 flex items-center gap-1" title="Tape a Live Mini Webpage onto the Page">
+                        <i data-lucide="globe" class="w-3.5 h-3.5 text-sky-700"></i>
+                        <span>+Web</span>
+                    </button>
+                    <button onclick="openInsertModal('right', 'pdf'); toggleTopTabsBar(false)" class="book-index-tab bg-rose-50 text-rose-950 border border-rose-300 flex items-center gap-1" title="Tape an Interactive PDF onto the Page">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5 text-rose-700"></i>
+                        <span>+PDF</span>
+                    </button>
+                    <button onclick="toggleAIDrawer(); toggleTopTabsBar(false)" class="book-index-tab bg-indigo-950 text-indigo-100 border border-indigo-700 flex items-center gap-1.5" title="Chat with Notes & Extract Tasks with Gemini AI">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+                        <span>Gemini AI</span>
+                    </button>
+                    <button onclick="toggleFullscreenMode()" class="book-index-tab bg-stone-800 text-stone-100 border border-stone-600 flex items-center gap-1" title="Toggle Fullscreen Mode">
+                        <i data-lucide="maximize-2" class="w-3.5 h-3.5 text-amber-300"></i>
+                    </button>
+                    <button onclick="openModal('vaultModal'); toggleTopTabsBar(false)" class="book-index-tab bg-emerald-950 text-emerald-100 border border-emerald-700 flex items-center gap-1" title="IndexedDB Vault, API Key & Clear Data">
+                        <i data-lucide="database" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Subtle Center Silk Ribbon & Pull-Down Tab Handle (Always peeking at the top crease) -->
+            <div id="topPullRibbonHandle"
+                 onpointerdown="startTopBarPullGesture(event)"
+                 class="pointer-events-auto cursor-pointer flex flex-col items-center group select-none touch-none -mt-1"
+                 title="Pull down or tap ribbon to reveal Notebook Tools">
+                <div id="centerSilkRibbon"
+                     class="w-7 h-10 bg-gradient-to-b from-red-900 via-red-700 to-red-800 shadow-md flex items-start justify-center pt-1.5 transition-all duration-200 group-hover:h-13"
+                     style="clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);">
+                    <i id="ribbonChevronIcon" data-lucide="chevron-down" class="w-3.5 h-3.5 text-amber-200/90"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- LEFT PAGE OF THE OPEN NOTEBOOK                                        -->
+        <!-- ===================================================================== -->
+        <section id="leftPageSheet"
+                 onclick="focusPageEditor('left', event)"
+                 class="w-full md:w-1/2 h-1/2 md:h-full paper-surface paper-ruled paper-stack-left relative flex flex-col pt-7 sm:pt-9 px-6 sm:px-11 pb-10 overflow-hidden cursor-text">
+
+            <!-- Red Vertical Margin Line -->
+            <div class="absolute top-0 bottom-0 left-10 sm:left-14 w-[1px] bg-red-400/25 pointer-events-none"></div>
+
+            <!-- Center Spine Crease Shadow on Right Edge of Left Page -->
+            <div class="crease-shadow-left absolute inset-0 pointer-events-none z-20"></div>
+
+            <!-- Page Header (Editable Title + Page Number) -->
+            <div class="relative z-10 flex items-baseline justify-between border-b border-stone-400/25 pb-1 mb-1 pl-4 sm:pl-6">
+                <input id="leftTitleInput" type="text" placeholder="Title or date..."
+                    oninput="updatePageField('left', 'title', this.value)"
+                    class="handwriting-area font-bold text-2xl sm:text-3xl w-full bg-transparent outline-none" />
+                <span id="leftPageNumber" class="text-xs font-mono text-stone-400 ml-2 select-none">01</span>
+            </div>
+
+            <!-- Tap-Anywhere Full-Page Handwritten Editor -->
+            <textarea id="leftNoteArea"
+                oninput="updatePageField('left', 'text', this.value)"
+                placeholder="Tap any line and start writing..."
+                class="handwriting-area relative z-10 w-full flex-1 pl-4 sm:pl-6 pr-2 overflow-y-auto"></textarea>
+
+            <!-- Taped Mini Webpages & PDF Clippings Container (Left Page) -->
+            <div id="leftWidgetsContainer" class="absolute inset-0 z-30 pointer-events-none overflow-hidden"></div>
+
+            <!-- Pen / Finger Ink Canvas Overlay (Left Page) -->
+            <canvas id="leftInkCanvas" class="absolute inset-0 w-full h-full z-25 pointer-events-none"></canvas>
+
+            <!-- Interactive Bottom-Left Page Corner Curl (Drag or Tap to Flip Back) -->
+            <div id="leftCornerCurl"
+                 onpointerdown="startInteractivePageCurl(event, -1)"
+                 class="corner-curl-zone-left"
+                 title="Drag or tap corner to flip back"></div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- CENTER FOLD HINGE SEAM & STITCHING                                    -->
+        <!-- ===================================================================== -->
+        <div class="hidden md:flex flex-col items-center justify-around w-[3px] h-full bg-stone-950/85 z-30 relative select-none pointer-events-none">
+            <span class="w-2.5 h-[2px] bg-amber-100/40 rounded-full"></span>
+            <span class="w-2.5 h-[2px] bg-amber-100/40 rounded-full"></span>
+            <span class="w-2.5 h-[2px] bg-amber-100/40 rounded-full"></span>
+            <span class="w-2.5 h-[2px] bg-amber-100/40 rounded-full"></span>
+            <span class="w-2.5 h-[2px] bg-amber-100/40 rounded-full"></span>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- RIGHT PAGE OF THE OPEN NOTEBOOK (FREE NOTES OR HANDWRITTEN CHECKLIST) -->
+        <!-- ===================================================================== -->
+        <section id="rightPageSheet"
+                 onclick="focusPageEditor('right', event)"
+                 class="w-full md:w-1/2 h-1/2 md:h-full paper-surface paper-ruled paper-stack-right relative flex flex-col pt-7 sm:pt-9 px-6 sm:px-11 pb-10 overflow-hidden cursor-text border-t md:border-t-0 border-stone-300">
+
+            <!-- Center Spine Crease Shadow on Left Edge of Right Page -->
+            <div class="crease-shadow-right absolute inset-0 pointer-events-none z-20"></div>
+
+            <!-- Page Header: Title + Subtle Paper Mode Switch (Notes vs. Checklist) -->
+            <div class="relative z-10 flex items-center justify-between border-b border-stone-400/25 pb-1 mb-1 pr-2">
+                <input id="rightTitleInput" type="text" placeholder="Companion notes or tasks..."
+                    oninput="updatePageField('right', 'title', this.value)"
+                    class="handwriting-area font-bold text-2xl sm:text-3xl flex-1 bg-transparent outline-none min-w-0" />
+
+                <div class="flex items-center gap-1 shrink-0 ml-2">
+                    <button id="modeBtnNote" onclick="switchRightPageMode('note')" class="text-xs px-2.5 py-0.5 rounded-full border border-stone-400/50 text-stone-700 hover:bg-stone-800/10 transition">
+                        Free Notes
+                    </button>
+                    <button id="modeBtnTodo" onclick="switchRightPageMode('todo')" class="text-xs px-2.5 py-0.5 rounded-full border border-stone-800 bg-stone-800 text-amber-100 transition">
+                        ✓ Checklist
+                    </button>
+                    <span id="rightPageNumber" class="text-xs font-mono text-stone-400 ml-1.5 select-none">02</span>
+                </div>
+            </div>
+
+            <!-- Right Page Mode A: Free Handwritten Notes -->
+            <textarea id="rightNoteArea"
+                oninput="updatePageField('right', 'text', this.value)"
+                placeholder="Write companion notes here, or switch to Checklist..."
+                class="handwriting-area relative z-10 w-full flex-1 pr-4 overflow-y-auto hidden"></textarea>
+
+            <!-- Right Page Mode B: Handwritten Action Checklist on Paper -->
+            <div id="rightChecklistView" class="relative z-10 flex-1 flex flex-col overflow-hidden">
+                <!-- Handwritten New Task Input Line -->
+                <div class="flex items-center gap-1.5 border-b border-stone-400/30 py-1 mb-1">
+                    <span class="text-stone-400 text-lg shrink-0">☐</span>
+                    <input id="newTaskInput" type="text" placeholder="Write a new task and press Enter..."
+                        onkeydown="if(event.key==='Enter') addChecklistTask()"
+                        class="handwriting-area flex-1 min-w-0 bg-transparent outline-none" />
+                    <select id="newTaskCategory" class="text-xs bg-stone-800/5 border border-stone-400/40 rounded-lg px-1.5 py-1 text-stone-700 outline-none shrink-0">
+                        <option value="Ready">⚡ Ready</option>
+                        <option value="Research">🔍 Research</option>
+                        <option value="Waiting">⏳ Waiting</option>
+                    </select>
+                    <button onclick="addChecklistTask()" class="px-2 py-0.5 rounded-lg bg-stone-800 text-amber-100 text-xs hover:bg-stone-700 transition shrink-0">
+                        Add
+                    </button>
+                    <button onclick="extractTasksFromNotesAI()" class="px-2 py-0.5 rounded-lg bg-indigo-950 text-amber-200 text-xs hover:bg-indigo-900 transition flex items-center gap-1 shrink-0" title="Extract Tasks from Left Page with Gemini AI">
+                        <i data-lucide="sparkles" class="w-3 h-3"></i> AI
+                    </button>
+                </div>
+
+                <!-- Tasks List Written Directly on the Ruled Lines -->
+                <ul id="handwrittenTodoList" class="flex-1 overflow-y-auto space-y-0 pr-1"></ul>
+            </div>
+
+            <!-- Taped Mini Webpages & PDF Clippings Container (Right Page) -->
+            <div id="rightWidgetsContainer" class="absolute inset-0 z-30 pointer-events-none overflow-hidden"></div>
+
+            <!-- Pen / Finger Ink Canvas Overlay (Right Page) -->
+            <canvas id="rightInkCanvas" class="absolute inset-0 w-full h-full z-25 pointer-events-none"></canvas>
+
+            <!-- Interactive Bottom-Right Page Corner Curl (Drag or Tap to Flip Forward) -->
+            <div id="rightCornerCurl"
+                 onpointerdown="startInteractivePageCurl(event, 1)"
+                 class="corner-curl-zone-right"
+                 title="Drag or tap corner to flip to next spread"></div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- 3D DYNAMIC PAGE-CURL LEAF & CAST SHADOW OVERLAY                       -->
+        <!-- ===================================================================== -->
+        <div id="curlCastShadow"></div>
+
+        <div id="curlLeafOverlay" class="curl-leaf hidden">
+            <div id="curlFrontSurface" class="curl-leaf-face paper-surface paper-ruled p-8 sm:p-11"></div>
+            <div id="curlBackSurface" class="curl-leaf-face curl-leaf-back paper-surface paper-ruled p-8 sm:p-11"></div>
+        </div>
+
+        <!-- ===================================================================== -->
+        <!-- FLOATING PEN, RUBBER, UNDO & PAGE PILL (Hideable by default!)         -->
+        <!-- ===================================================================== -->
+        <div class="absolute bottom-0 inset-x-0 z-[60] pointer-events-none flex flex-col items-center justify-end pb-2 sm:pb-3 overflow-hidden">
+
+            <!-- Hidden-by-default Bottom Pen Bar that slides up when pulled or tapped -->
+            <div id="bottomPenDrawer" class="mb-1.5 flex items-center gap-1 sm:gap-1.5 px-3 py-1.5 rounded-full bg-stone-900/95 backdrop-blur-md border border-amber-300/25 text-stone-100 shadow-2xl max-w-[94vw] overflow-x-auto">
+                <!-- Type vs Ink Tools -->
+                <button id="pillToolText" onclick="selectNotebookTool('text')" class="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-400 text-stone-950 transition flex items-center gap-1 shrink-0" title="Type Anywhere on Paper">
+                    <i data-lucide="type" class="w-3.5 h-3.5"></i>
+                    <span>Type</span>
+                </button>
+                <button id="pillToolPen" onclick="selectNotebookTool('pen')" class="px-2.5 py-1 rounded-full text-xs font-medium text-stone-300 hover:text-white transition flex items-center gap-1 shrink-0" title="Pen Fountain Ink">
+                    <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                    <span>Draw</span>
+                </button>
+                <button id="pillToolMarker" onclick="selectNotebookTool('marker')" class="px-2 py-1 rounded-full text-xs font-medium text-stone-300 hover:text-white transition flex items-center gap-1 shrink-0" title="Highlighter">
+                    <i data-lucide="highlighter" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="pillToolEraser" onclick="selectNotebookTool('eraser')" class="px-2.5 py-1 rounded-full text-xs font-medium text-stone-300 hover:text-white transition flex items-center gap-1 shrink-0" title="Rubber (Eraser)">
+                    <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                    <span>Rubber</span>
+                </button>
+                <button id="pillUndoBtn" onclick="undoLastAction()" class="px-2 py-1 rounded-full text-xs font-medium text-stone-500 hover:text-amber-300 transition flex items-center gap-1 opacity-40 pointer-events-none shrink-0" title="Undo Last Action (Ctrl+Z)">
+                    <i data-lucide="undo-2" class="w-3.5 h-3.5"></i>
+                    <span>Undo</span>
+                </button>
+
+                <div class="h-3.5 w-[1px] bg-white/20 mx-0.5 shrink-0"></div>
+
+                <!-- Ink Dots -->
+                <button onclick="selectInkSwatch('#1E293B')" class="w-4 h-4 rounded-full bg-slate-800 ring-2 ring-amber-400 ink-dot shrink-0" data-color="#1E293B"></button>
+                <button onclick="selectInkSwatch('#1D4ED8')" class="w-4 h-4 rounded-full bg-blue-700 ink-dot shrink-0" data-color="#1D4ED8"></button>
+                <button onclick="selectInkSwatch('#B91C1C')" class="w-4 h-4 rounded-full bg-red-700 ink-dot shrink-0" data-color="#B91C1C"></button>
+                <button onclick="selectInkSwatch('#047857')" class="w-4 h-4 rounded-full bg-emerald-700 ink-dot shrink-0" data-color="#047857"></button>
+
+                <div class="h-3.5 w-[1px] bg-white/20 mx-0.5 shrink-0"></div>
+
+                <!-- Spread Indicator & Quick Flip -->
+                <button onclick="triggerSmoothPageTurn(-1)" class="p-1 hover:text-amber-300 transition shrink-0" title="Previous Page">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="openIndexModal()" id="pillSpreadLabel" class="text-[11px] font-mono text-amber-200 hover:text-amber-400 px-1.5 py-0.5 rounded hover:bg-white/10 transition shrink-0" title="Open Table of Contents & Export">1–2</button>
+                <button onclick="triggerSmoothPageTurn(1)" class="p-1 hover:text-amber-300 transition shrink-0" title="Next Page (Auto-creates new pages)">
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="createNewNoteSpread()" class="p-1 text-emerald-300 hover:text-emerald-200 transition shrink-0" title="Start a New Note Section">
+                    <i data-lucide="file-plus-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="toggleFullscreenMode()" class="p-1 text-stone-300 hover:text-amber-300 transition shrink-0" title="Toggle Fullscreen on Galaxy Z Fold 8">
+                    <i id="pillFullscreenIcon" data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="toggleBottomPenBar(false)" class="p-1 text-stone-400 hover:text-amber-300 transition shrink-0" title="Hide Pen Bar">
+                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+
+            <!-- Subtle Bottom Pen Nib / Brass Tab Handle (Always peeking at the bottom crease) -->
+            <div id="bottomPullPenHandle"
+                 onpointerdown="startBottomBarPullGesture(event)"
+                 class="pointer-events-auto cursor-pointer flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-stone-900/85 hover:bg-stone-900 text-amber-200/90 border border-amber-300/30 shadow-lg backdrop-blur-md transition-all duration-200 select-none touch-none"
+                 title="Pull up or tap to reveal Pen, Rubber & Undo Bar">
+                <i data-lucide="pen-tool" class="w-3 h-3 text-amber-300"></i>
+                <span id="bottomHandleModeLabel" class="text-[10px] font-mono uppercase tracking-wider">Pen Bar</span>
+                <i id="bottomPenChevronIcon" data-lucide="chevron-up" class="w-3 h-3 text-amber-200/80"></i>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- 2B. MODAL: TABLE OF CONTENTS (SWITCH / NEW NOTE) & SHARE / EXPORT (.MD)   -->
+    <!-- ========================================================================= -->
+    <div id="indexShareModal" class="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#FBF8F1] text-stone-900 border-2 border-stone-300 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-stone-300 pb-3 shrink-0">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="book-marked" class="w-5 h-5 text-amber-800"></i>
+                        <span>Notebook Index & Export</span>
+                    </h3>
+                    <p class="text-xs text-stone-500">Jump to saved notes in IndexedDB, start a fresh section, or export</p>
+                </div>
+                <button onclick="closeModal('indexShareModal')" class="p-1.5 rounded-lg hover:bg-stone-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 bg-amber-100/70 border border-amber-300/80 rounded-2xl p-3 shrink-0">
+                <div class="text-xs text-amber-950">
+                    <div class="font-bold">Start a Fresh Note Section</div>
+                    <div class="text-[11px] text-amber-800/80">Appends a clean 2-page spread and curls right to it</div>
+                </div>
+                <button onclick="createNewNoteSpread(true)" class="px-3.5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-100 text-xs font-bold flex items-center gap-1.5 shrink-0 shadow">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>New Note</span>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="tocSpreadList"></div>
+
+            <div class="border-t border-stone-300 pt-3.5 space-y-2.5 shrink-0">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider text-stone-500">Share or Export Notes</span>
+                    <select id="exportScopeSelect" class="text-xs bg-white border border-stone-300 rounded-lg px-2 py-1 text-stone-800 outline-none">
+                        <option value="current">Current Open Spread</option>
+                        <option value="all">Entire Notebook + Checklist</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <button onclick="exportNotesFile('md')" class="py-2 px-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-100 font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                        <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+                        <span>.MD File</span>
+                    </button>
+                    <button onclick="exportNotesFile('txt')" class="py-2 px-2.5 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-100 font-bold flex items-center justify-center gap-1.5 shadow-sm">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                        <span>.TXT File</span>
+                    </button>
+                    <button onclick="copyNotesToClipboard()" class="py-2 px-2.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold flex items-center justify-center gap-1.5">
+                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                        <span>Copy MD</span>
+                    </button>
+                    <button onclick="shareNotesNative()" class="py-2 px-2.5 rounded-xl bg-amber-200/80 hover:bg-amber-300/80 text-amber-950 font-bold flex items-center justify-center gap-1.5">
+                        <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                        <span>Share</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. GEMINI AI COMPANION SLIDE-OVER SHEET                                   -->
+    <!-- ========================================================================= -->
+    <aside id="aiCompanionSheet" class="fixed top-3 bottom-3 right-3 w-[92vw] sm:w-[390px] bg-stone-900/95 backdrop-blur-xl border border-amber-400/30 rounded-3xl shadow-2xl z-50 flex flex-col overflow-hidden transition-transform duration-300 translate-x-[115%] text-stone-100">
+        <div class="p-4 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-stone-900 via-indigo-950/60 to-stone-900">
+            <div class="flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+                <div>
+                    <h3 class="text-sm font-bold">Gemini Notebook Assistant</h3>
+                    <p class="text-[11px] text-stone-400">Chats directly with your handwritten pages & checklist</p>
+                </div>
+            </div>
+            <button onclick="toggleAIDrawer()" class="p-1.5 rounded-lg hover:bg-white/10 text-stone-400">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <div class="px-3 py-2 flex gap-1.5 overflow-x-auto border-b border-white/10 text-[11px] shrink-0">
+            <button onclick="askGeminiPreset('Summarize the notes on my current open spread.')" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/15 text-amber-200 whitespace-nowrap">✨ Summarize Spread</button>
+            <button onclick="extractTasksFromNotesAI()" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/15 text-emerald-200 whitespace-nowrap">✅ Extract To-Dos</button>
+            <button onclick="askGeminiPreset('Prioritize my checklist items and suggest what to tackle first.')" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/15 text-sky-200 whitespace-nowrap">📅 Prioritize Tasks</button>
+        </div>
+
+        <div id="aiMessagesBox" class="flex-1 p-4 overflow-y-auto space-y-3 text-xs">
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-3.5 leading-relaxed">
+                Ask me anything about your notebook pages or to-do list. You can also add your own Gemini API key in the <button onclick="openModal('vaultModal')" class="underline text-amber-300">IndexedDB Vault</button>.
+            </div>
+        </div>
+
+        <div class="p-3 border-t border-white/10 flex items-center gap-2 bg-black/40">
+            <input id="aiPromptInput" type="text" placeholder="Ask Gemini about your notes or tasks..."
+                onkeydown="if(event.key==='Enter') sendGeminiChat()"
+                class="flex-1 bg-white/10 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-400 outline-none focus:border-amber-400" />
+            <button onclick="sendGeminiChat()" class="p-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold">
+                <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ========================================================================= -->
+    <!-- 4. MODAL: TYPEDRAW-STYLE PAPER, HANDWRITING FONT & COVER PERSONALIZER     -->
+    <!-- ========================================================================= -->
+    <div id="customizerModal" class="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#FBF8F1] text-stone-900 border-2 border-stone-300 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-stone-300 pb-3">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i data-lucide="feather" class="w-5 h-5 text-amber-800"></i>
+                    <span>Personalize Your Notebook</span>
+                </h3>
+                <button onclick="closeModal('customizerModal')" class="p-1 rounded-lg hover:bg-stone-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Handwriting & Editorial Fonts</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="updateMeta('fontFamily', `'Caveat', cursive`, '26px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-xl" style="font-family: 'Caveat', cursive;">Caveat Script</button>
+                    <button onclick="updateMeta('fontFamily', `'Patrick Hand', cursive`, '22px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-lg" style="font-family: 'Patrick Hand', cursive;">Patrick Hand</button>
+                    <button onclick="updateMeta('fontFamily', `'Shadows Into Light', cursive`, '22px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-lg" style="font-family: 'Shadows Into Light', cursive;">Shadows Into Light</button>
+                    <button onclick="updateMeta('fontFamily', `'Indie Flower', cursive`, '21px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-lg" style="font-family: 'Indie Flower', cursive;">Indie Flower</button>
+                    <button onclick="updateMeta('fontFamily', `'Kalam', cursive`, '20px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-base" style="font-family: 'Kalam', cursive;">Kalam Fountain</button>
+                    <button onclick="updateMeta('fontFamily', `'Architects Daughter', cursive`, '19px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-base" style="font-family: 'Architects Daughter', cursive;">Architect's Sketch</button>
+                    <button onclick="updateMeta('fontFamily', `'Reenie Beanie', cursive`, '28px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-2xl" style="font-family: 'Reenie Beanie', cursive;">Reenie Quick Jot</button>
+                    <button onclick="updateMeta('fontFamily', `'Gloria Hallelujah', cursive`, '18px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-sm" style="font-family: 'Gloria Hallelujah', cursive;">Gloria Marker</button>
+                    <button onclick="updateMeta('fontFamily', `'Homemade Apple', cursive`, '16px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-sm" style="font-family: 'Homemade Apple', cursive;">Cursive Calligraphy</button>
+                    <button onclick="updateMeta('fontFamily', `'Cormorant Garamond', serif`, '21px')" class="p-2.5 rounded-xl border border-stone-300 hover:border-stone-800 bg-white/70 text-left text-lg" style="font-family: 'Cormorant Garamond', serif;">Book Garamond</button>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Page Layout</label>
+                <div class="grid grid-cols-4 gap-2 text-sm">
+                    <button onclick="updateMeta('paperStyle', 'ruled')" class="py-2 rounded-xl border border-stone-300 bg-white hover:border-stone-800 font-semibold">Lined</button>
+                    <button onclick="updateMeta('paperStyle', 'dotted')" class="py-2 rounded-xl border border-stone-300 bg-white hover:border-stone-800 font-semibold">Dotted</button>
+                    <button onclick="updateMeta('paperStyle', 'grid')" class="py-2 rounded-xl border border-stone-300 bg-white hover:border-stone-800 font-semibold">Grid</button>
+                    <button onclick="updateMeta('paperStyle', 'blank')" class="py-2 rounded-xl border border-stone-300 bg-white hover:border-stone-800 font-semibold">Blank</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Paper Stock</label>
+                    <div class="flex gap-2">
+                        <button onclick="updateMeta('paperColor', '#FFFFFF')" class="w-9 h-9 rounded-full bg-white border-2 border-stone-800 shadow-sm" title="Pure Crisp White (TypeDraw Default)"></button>
+                        <button onclick="updateMeta('paperColor', '#FBF8F1')" class="w-9 h-9 rounded-full bg-[#FBF8F1] border-2 border-stone-400" title="Warm Moleskine Cream"></button>
+                        <button onclick="updateMeta('paperColor', '#EFE6D5')" class="w-9 h-9 rounded-full bg-[#EFE6D5] border-2 border-stone-400" title="Vintage Kraft"></button>
+                        <button onclick="updateMeta('paperColor', '#E8EEF2')" class="w-9 h-9 rounded-full bg-[#E8EEF2] border-2 border-stone-400" title="Blueprint Ice"></button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Clear Pen Ink</label>
+                    <button onclick="clearSpreadInk()" class="px-3 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 text-xs font-bold border border-rose-300">
+                        Erase Spread Drawings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 5. MODAL: TAPE MINI WEBPAGE OR INTERACTIVE PDF ONTO THE PAPER             -->
+    <!-- ========================================================================= -->
+    <div id="insertMediaModal" class="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#FBF8F1] text-stone-900 border-2 border-stone-300 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-stone-300 pb-3">
+                <h3 id="insertModalHeading" class="text-lg font-bold flex items-center gap-2">
+                    <i data-lucide="paperclip" class="w-4 h-4 text-amber-800"></i>
+                    <span>Tape Clipping to Notebook Page</span>
+                </h3>
+                <button onclick="closeModal('insertMediaModal')" class="p-1 rounded-lg hover:bg-stone-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button id="targetBtnLeft" onclick="setInsertSide('left')" class="py-2 rounded-xl bg-stone-800 text-amber-100 font-bold">Left Page</button>
+                <button id="targetBtnRight" onclick="setInsertSide('right')" class="py-2 rounded-xl bg-stone-200 text-stone-700 font-bold">Right Page</button>
+            </div>
+
+            <div id="webInsertPane" class="space-y-3">
+                <input id="webUrlField" type="url" placeholder="https://en.m.wikipedia.org/wiki/Foldable_smartphone"
+                    class="w-full bg-white border border-stone-300 rounded-xl px-3.5 py-2 text-xs text-stone-900 outline-none focus:border-stone-800" />
+                <div class="flex flex-wrap gap-1.5 text-[11px]">
+                    <button onclick="document.getElementById('webUrlField').value='https://en.m.wikipedia.org/wiki/Foldable_smartphone'" class="px-2 py-1 rounded-lg bg-stone-200 hover:bg-stone-300">Wikipedia: Foldables</button>
+                    <button onclick="document.getElementById('webUrlField').value='https://en.m.wikipedia.org/wiki/Commonplace_book'" class="px-2 py-1 rounded-lg bg-stone-200 hover:bg-stone-300">Commonplace Book</button>
+                    <button onclick="document.getElementById('webUrlField').value='https://example.com'" class="px-2 py-1 rounded-lg bg-stone-200 hover:bg-stone-300">Example.com</button>
+                </div>
+                <button onclick="insertLiveWebClipping()" class="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-amber-100 font-bold text-xs shadow">
+                    Tape Live Mini Webpage onto Page
+                </button>
+            </div>
+
+            <div id="pdfInsertPane" class="hidden space-y-3">
+                <div class="border-2 border-dashed border-stone-400 rounded-2xl p-4 text-center bg-white/60">
+                    <p class="text-xs font-bold text-stone-800 mb-1">Select a PDF File from your Device</p>
+                    <input type="file" accept="application/pdf" onchange="handlePdfFileSelected(event)"
+                        class="text-xs text-stone-600 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-stone-800 file:text-amber-100 cursor-pointer" />
+                </div>
+                <button onclick="insertSamplePdfClipping()" class="w-full py-2.5 rounded-xl bg-rose-900 hover:bg-rose-800 text-rose-100 font-bold text-xs shadow">
+                    Tape Sample Multi-Page PDF Brief
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 6. MODAL: INDEXEDDB VAULT, GEMINI API KEY & ONE-CLICK CLEAR               -->
+    <!-- ========================================================================= -->
+    <div id="vaultModal" class="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-[#FBF8F1] text-stone-900 border-2 border-stone-300 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-stone-300 pb-3">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-emerald-700"></i>
+                    <span>Local IndexedDB Vault & AI Key</span>
+                </h3>
+                <button onclick="closeModal('vaultModal')" class="p-1 rounded-lg hover:bg-stone-200">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold uppercase tracking-wider text-stone-600 block">Gemini API Key (Saved in IndexedDB)</label>
+                <div class="flex gap-2">
+                    <input id="vaultApiKeyInput" type="password" placeholder="AIza... (or leave blank for built-in key)"
+                        class="flex-1 bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs outline-none focus:border-stone-800" />
+                    <button onclick="saveVaultApiKey()" class="px-3.5 py-2 rounded-xl bg-stone-900 text-amber-100 text-xs font-bold">
+                        Save
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-stone-200/70 border border-stone-300 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-stone-600">Storage Engine:</span>
+                    <span class="font-mono font-bold text-emerald-800">IndexedDB (FoldFolioVault_v3)</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-stone-600">Saved Content:</span>
+                    <span id="vaultSummaryStats" class="font-mono font-bold">2 Pages • 0 Tasks</span>
+                </div>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-rose-100/80 border border-rose-300 space-y-2">
+                <div class="text-xs font-bold text-rose-900">Clear All Notebook Data</div>
+                <p class="text-[11px] text-rose-800">Wipes all pages, handwriting, Pen drawings, web/PDF clippings, and keys from IndexedDB.</p>
+                <div id="wipeStep1">
+                    <button onclick="toggleWipeConfirm(true)" class="w-full py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold">
+                        Clear IndexedDB Vault...
+                    </button>
+                </div>
+                <div id="wipeStep2" class="hidden flex gap-2">
+                    <button onclick="wipeAllIndexedDB()" class="flex-1 py-2 rounded-xl bg-rose-900 text-white text-xs font-bold">Yes, Erase Everything</button>
+                    <button onclick="toggleWipeConfirm(false)" class="px-3 py-2 rounded-xl bg-stone-300 text-stone-800 text-xs font-bold">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBTLE PAPER TOAST -->
+    <div id="paperToast" class="fixed top-12 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-stone-900/90 text-amber-100 text-xs shadow-xl z-50 pointer-events-none opacity-0 transition-opacity duration-300">
+        Saved to IndexedDB
+    </div>
+
+    <script>
+        if (window.pdfjsLib) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // =========================================================================
+        // 1. GLOBAL STATE, UNDO HISTORY & INDEXEDDB VAULT ENGINE
+        // =========================================================================
+        const DB_NAME = 'FoldFolioVault_v3';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'notebookState';
+
+        function createDefaultState() {
+            return {
+                currentSpread: 0,
+                rightMode: 'todo',
+                meta: {
+                    title: 'Galaxy Z Fold 8 Journal',
+                    coverColor: '#1A1D24',
+                    paperColor: '#FFFFFF',
+                    paperStyle: 'ruled',
+                    fontFamily: `'Caveat', cursive`,
+                    fontSize: '26px',
+                    customApiKey: '',
+                    soundEnabled: true,
+                    fullscreenPreferred: true
+                },
+                spreads: [
+                    {
+                        bookmarked: false,
+                        left: { title: '', text: '', ink: null, widgets: [] },
+                        right: { title: '', text: '', ink: null, widgets: [] }
+                    }
+                ],
+                todos: []
+            };
+        }
+
+        let state = createDefaultState();
+        let currentTool = 'text';
+        let currentInkColor = '#1E293B';
+        let insertTargetSide = 'left';
+        let undoStack = [];
+        let lastUndoRecordTime = 0;
+
+        function recordUndoSnapshot(force = false) {
+            const now = Date.now();
+            if (!force && now - lastUndoRecordTime < 900) return;
+            lastUndoRecordTime = now;
+            const snapshot = JSON.stringify({
+                currentSpread: state.currentSpread,
+                rightMode: state.rightMode,
+                spreads: state.spreads,
+                todos: state.todos
+            });
+            if (undoStack.length && undoStack[undoStack.length - 1] === snapshot) return;
+            undoStack.push(snapshot);
+            if (undoStack.length > 25) undoStack.shift();
+            updateUndoButtonUI();
+        }
+
+        function updateUndoButtonUI() {
+            const btn = document.getElementById('pillUndoBtn');
+            if (!btn) return;
+            if (undoStack.length > 0) {
+                btn.classList.remove('opacity-40', 'pointer-events-none', 'text-stone-500');
+                btn.classList.add('text-amber-300');
+            } else {
+                btn.classList.add('opacity-40', 'pointer-events-none', 'text-stone-500');
+                btn.classList.remove('text-amber-300');
+            }
+        }
+
+        function undoLastAction() {
+            if (!undoStack.length) return;
+            const prev = JSON.parse(undoStack.pop());
+            state.currentSpread = prev.currentSpread;
+            state.rightMode = prev.rightMode;
+            state.spreads = prev.spreads;
+            state.todos = prev.todos;
+            updateUndoButtonUI();
+            renderSpread();
+            renderChecklist();
+            queueSave();
+            toast('Undid last action');
+        }
+
+        function openVaultDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function loadFromDB() {
+            try {
+                const db = await openVaultDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction(STORE_NAME, 'readonly');
+                    const req = tx.objectStore(STORE_NAME).get('root');
+                    req.onsuccess = () => {
+                        if (req.result) {
+                            state = Object.assign(createDefaultState(), req.result);
+                            state.meta = Object.assign(createDefaultState().meta, req.result.meta || {});
+                        }
+                        const keyField = document.getElementById('vaultApiKeyInput');
+                        if (keyField) keyField.value = state.meta.customApiKey || '';
+                        resolve();
+                    };
+                    req.onerror = () => resolve();
+                });
+            } catch (e) {}
+        }
+
+        let saveTimer = null;
+        function queueSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(async () => {
+                try {
+                    const db = await openVaultDB();
+                    const tx = db.transaction(STORE_NAME, 'readwrite');
+                    tx.objectStore(STORE_NAME).put(state, 'root');
+                    updateVaultStats();
+                    updateUnderCoverPreview();
+                } catch (e) {}
+            }, 250);
+        }
+
+        function updateVaultStats() {
+            const el = document.getElementById('vaultSummaryStats');
+            const badge = document.getElementById('coverBadgePages');
+            const pagesCount = (state.spreads?.length || 1) * 2;
+            if (el) el.textContent = `${pagesCount} Pages • ${state.todos?.length || 0} Tasks`;
+            if (badge) badge.textContent = `${pagesCount} PAGES`;
+        }
+
+        function toggleWipeConfirm(showConfirm) {
+            document.getElementById('wipeStep1').classList.toggle('hidden', showConfirm);
+            document.getElementById('wipeStep2').classList.toggle('hidden', !showConfirm);
+        }
+
+        async function wipeAllIndexedDB() {
+            try {
+                const db = await openVaultDB();
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                tx.objectStore(STORE_NAME).clear();
+            } catch (e) {}
+            undoStack = [];
+            updateUndoButtonUI();
+            state = createDefaultState();
+            toggleWipeConfirm(false);
+            closeModal('vaultModal');
+            applyNotebookStyling();
+            renderSpread();
+            renderChecklist();
+            toast('IndexedDB Vault wiped clean');
+        }
+
+        // =========================================================================
+        // 2. SYNTHESIZED PAPER & ELASTIC STRAP ACOUSTICS (WEB AUDIO / TONE.JS)
+        // =========================================================================
+        function toggleAudioAcoustics() {
+            state.meta.soundEnabled = !state.meta.soundEnabled;
+            const icon = document.getElementById('tabAudioIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', state.meta.soundEnabled ? 'volume-2' : 'volume-x');
+                lucide.createIcons();
+            }
+            queueSave();
+            toast(state.meta.soundEnabled ? 'Paper acoustics enabled' : 'Acoustics muted');
+        }
+
+        function playPageRustle() {
+            if (!state.meta?.soundEnabled) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const bufferSize = ctx.sampleRate * 0.14;
+                const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.45)) * 0.14;
+                }
+                const noise = ctx.createBufferSource();
+                noise.buffer = buffer;
+                const filter = ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 1100;
+                noise.connect(filter);
+                filter.connect(ctx.destination);
+                noise.start();
+            } catch (e) {}
+        }
+
+        function playElasticSnap() {
+            if (!state.meta?.soundEnabled) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(48, ctx.currentTime + 0.11);
+                gain.gain.setValueAtTime(0.22, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.11);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch (e) {}
+        }
+
+        // =========================================================================
+        // 3. 3D FRONT COVER & ELASTIC STRAP INTERACTION
+        // =========================================================================
+        let isCoverAnimating = false;
+
+        function setCoverColor(hex) {
+            updateMeta('coverColor', hex);
+        }
+
+        function updateUnderCoverPreview() {
+            const sp = state.spreads?.[0];
+            if (!sp) return;
+            const titleEl = document.getElementById('underCoverPreviewTitle');
+            const textEl = document.getElementById('underCoverPreviewText');
+            if (titleEl) titleEl.textContent = sp.left.title || 'Page 1';
+            if (textEl) textEl.textContent = sp.left.text || '';
+        }
+
+        function startElasticPull(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (isCoverAnimating) return;
+
+            const strap = document.getElementById('elasticStrap');
+            const leaf = document.getElementById('hardcoverLeaf3D');
+            if (!strap || !leaf) return;
+
+            const startX = e.clientX;
+            const startY = e.clientY;
+            let dx = 0;
+            let dy = 0;
+
+            strap.style.transition = 'none';
+            leaf.style.transition = 'none';
+
+            const onMove = (ev) => {
+                dx = ev.clientX - startX;
+                dy = ev.clientY - startY;
+
+                // Allow pulling the strap either left OR right
+                const clampedX = Math.max(-160, Math.min(130, dx));
+                const scaleX = 1 + Math.abs(clampedX) / 220;
+                strap.style.transform = `translateX(${clampedX * 0.55}px) scaleX(${scaleX.toFixed(2)})`;
+
+                // As the user pulls left, also start swinging the 3D hardcover open
+                if (dx < -10) {
+                    const angle = Math.max(-145, (dx / 260) * 145);
+                    leaf.style.transform = `rotateY(${angle}deg)`;
+                } else if (dx > 10) {
+                    const angle = Math.max(-35, -(dx / 180) * 35);
+                    leaf.style.transform = `rotateY(${angle}deg)`;
+                }
+            };
+
+            const finishPull = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', finishPull);
+                window.removeEventListener('pointercancel', finishPull);
+
+                const totalDist = Math.hypot(dx, dy);
+                // Open if pulled left/right past 24px OR if tapped (<10px)
+                if (Math.abs(dx) > 24 || totalDist < 10) {
+                    playElasticSnap();
+                    strap.style.transition = 'transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    strap.style.transform = 'translateX(95px) scaleX(0.85)';
+                    toggleCoverView(false);
+                } else {
+                    strap.style.transition = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    strap.style.transform = 'translateX(0px) scaleX(1)';
+                    leaf.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+                    leaf.style.transform = 'rotateY(0deg)';
+                }
+            };
+
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', finishPull);
+            window.addEventListener('pointercancel', finishPull);
+        }
+
+        function startCoverDragToOpen(e) {
+            if (isCoverAnimating) return;
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || e.target.closest('#elasticStrap')) return;
+
+            const leaf = document.getElementById('hardcoverLeaf3D');
+            if (!leaf) return;
+
+            const startX = e.clientX;
+            let dx = 0;
+            leaf.style.transition = 'none';
+
+            const onMove = (ev) => {
+                dx = ev.clientX - startX;
+                if (dx < 0) {
+                    const deg = Math.max(-165, (dx / 280) * 165);
+                    leaf.style.transform = `rotateY(${deg}deg)`;
+                }
+            };
+
+            const finishCoverDrag = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', finishCoverDrag);
+                window.removeEventListener('pointercancel', finishCoverDrag);
+
+                if (dx < -45) {
+                    toggleCoverView(false);
+                } else {
+                    leaf.style.transition = 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)';
+                    leaf.style.transform = 'rotateY(0deg)';
+                }
+            };
+
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', finishCoverDrag);
+            window.addEventListener('pointercancel', finishCoverDrag);
+        }
+
+        function toggleCoverView(showCover) {
+            const screen = document.getElementById('closedCoverScreen');
+            const leaf = document.getElementById('hardcoverLeaf3D');
+            const strap = document.getElementById('elasticStrap');
+            if (!screen || !leaf) return;
+
+            isCoverAnimating = true;
+
+            if (showCover) {
+                screen.classList.remove('hidden');
+                screen.style.display = 'flex';
+                screen.style.pointerEvents = 'auto';
+                requestAnimationFrame(() => {
+                    screen.style.opacity = '1';
+                    leaf.style.transition = 'transform 0.72s cubic-bezier(0.22, 1, 0.36, 1)';
+                    leaf.style.transform = 'rotateY(0deg)';
+                    if (strap) {
+                        strap.style.transition = 'transform 0.4s ease';
+                        strap.style.transform = 'translateX(0px) scaleX(1)';
+                    }
+                });
+                playPageRustle();
+                setTimeout(() => {
+                    isCoverAnimating = false;
+                }, 730);
+            } else {
+                autoRequestFoldFullscreen();
+                playPageRustle();
+                leaf.style.transition = 'transform 0.72s cubic-bezier(0.22, 1, 0.36, 1)';
+                leaf.style.transform = 'rotateY(-165deg)';
+                screen.style.opacity = '0';
+                screen.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    screen.classList.add('hidden');
+                    screen.style.display = 'none';
+                    isCoverAnimating = false;
+                    resizeCanvases();
+                }, 680);
+            }
+        }
+
+        // =========================================================================
+        // 3B. PULL-DOWN TOP BAR & PULL-UP BOTTOM BAR ("PURE PAPER" MODE)
+        // =========================================================================
+        let topBarOpen = false;
+        let bottomBarOpen = false;
+
+        function toggleTopTabsBar(forceState) {
+            const drawer = document.getElementById('topTabsDrawer');
+            if (!drawer) return;
+            topBarOpen = typeof forceState === 'boolean' ? forceState : !topBarOpen;
+            drawer.classList.toggle('drawer-open', topBarOpen);
+            const icon = document.getElementById('ribbonChevronIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', topBarOpen ? 'chevron-up' : 'chevron-down');
+                lucide.createIcons();
+            }
+        }
+
+        function startTopBarPullGesture(e) {
+            e.stopPropagation();
+            const startY = e.clientY;
+            let movedY = 0;
+
+            const onMove = (ev) => {
+                movedY = ev.clientY - startY;
+                if (movedY > 18 && !topBarOpen) {
+                    toggleTopTabsBar(true);
+                } else if (movedY < -18 && topBarOpen) {
+                    toggleTopTabsBar(false);
+                }
+            };
+
+            const onUp = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+                if (Math.abs(movedY) < 12) {
+                    toggleTopTabsBar();
+                }
+            };
+
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+        }
+
+        function toggleBottomPenBar(forceState) {
+            const drawer = document.getElementById('bottomPenDrawer');
+            if (!drawer) return;
+            bottomBarOpen = typeof forceState === 'boolean' ? forceState : !bottomBarOpen;
+            drawer.classList.toggle('drawer-open', bottomBarOpen);
+            const icon = document.getElementById('bottomPenChevronIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', bottomBarOpen ? 'chevron-down' : 'chevron-up');
+                lucide.createIcons();
+            }
+        }
+
+        function startBottomBarPullGesture(e) {
+            e.stopPropagation();
+            const startY = e.clientY;
+            let movedY = 0;
+
+            const onMove = (ev) => {
+                movedY = ev.clientY - startY;
+                if (movedY < -18 && !bottomBarOpen) {
+                    toggleBottomPenBar(true);
+                } else if (movedY > 18 && bottomBarOpen) {
+                    toggleBottomPenBar(false);
+                }
+            };
+
+            const onUp = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+                if (Math.abs(movedY) < 12) {
+                    toggleBottomPenBar();
+                }
+            };
+
+            window.addEventListener('pointermove', onMove);
+            window.addEventListener('pointerup', onUp);
+        }
+
+        function autoRequestFoldFullscreen() {
+            if (state.meta && state.meta.fullscreenPreferred === false) return;
+            try {
+                const docEl = document.documentElement;
+                if (!document.fullscreenElement && docEl.requestFullscreen) {
+                    docEl.requestFullscreen().then(() => {
+                        syncFullscreenIcons();
+                        setTimeout(resizeCanvases, 250);
+                    }).catch(() => {});
+                }
+            } catch (e) {}
+        }
+
+        function syncFullscreenIcons() {
+            const isFs = !!document.fullscreenElement;
+            const icon = document.getElementById('pillFullscreenIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', isFs ? 'minimize-2' : 'maximize-2');
+                lucide.createIcons();
+            }
+        }
+
+        function toggleFullscreenMode() {
+            try {
+                if (!document.fullscreenElement) {
+                    state.meta.fullscreenPreferred = true;
+                    queueSave();
+                    document.documentElement.requestFullscreen().then(() => {
+                        syncFullscreenIcons();
+                        toast('Full-bleed Fold 8 mode active (saved default)');
+                        setTimeout(resizeCanvases, 250);
+                    }).catch(() => {
+                        toast('Fullscreen blocked by browser');
+                    });
+                } else {
+                    state.meta.fullscreenPreferred = false;
+                    queueSave();
+                    document.exitFullscreen().then(() => {
+                        syncFullscreenIcons();
+                        toast('Exited fullscreen (preference saved)');
+                        setTimeout(resizeCanvases, 250);
+                    }).catch(() => {});
+                }
+            } catch (e) {}
+        }
+
+        function initBuiltInPWA() {
+            try {
+                const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#1A1D24"/><rect x="76" y="56" width="360" height="400" rx="36" fill="#FFFFFF" stroke="#D6D3D1" stroke-width="12"/><rect x="76" y="56" width="54" height="400" rx="16" fill="#27272A"/><rect x="346" y="48" width="34" height="416" fill="#F59E0B"/><path d="M230 56v130l28-22 28 22V56z" fill="#991B1B"/><line x1="164" y1="176" x2="316" y2="176" stroke="#94A3B8" stroke-width="14" stroke-linecap="round"/><line x1="164" y1="236" x2="316" y2="236" stroke="#94A3B8" stroke-width="14" stroke-linecap="round"/><line x1="164" y1="296" x2="276" y2="296" stroke="#94A3B8" stroke-width="14" stroke-linecap="round"/></svg>`;
+                const iconDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(iconSvg);
+                const manifestObj = {
+                    name: "FoldFolio Notebook",
+                    short_name: "FoldFolio",
+                    description: "Full-Bleed Dual-Screen Notebook for Galaxy Z Fold 8",
+                    start_url: window.location.href,
+                    display: "fullscreen",
+                    orientation: "any",
+                    background_color: "#1A1D24",
+                    theme_color: "#1A1D24",
+                    icons: [
+                        {
+                            src: iconDataUrl,
+                            sizes: "192x192 512x512",
+                            type: "image/svg+xml",
+                            purpose: "any maskable"
+                        }
+                    ]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+                const manifestUrl = URL.createObjectURL(manifestBlob);
+                const linkEl = document.getElementById('pwaManifestLink');
+                if (linkEl) linkEl.setAttribute('href', manifestUrl);
+            } catch (e) {}
+        }
+
+        function saveCoverJot(target) {
+            const box = document.getElementById('coverQuickInput');
+            const val = box.value.trim();
+            if (!val) return;
+            if (target === 'todo') {
+                state.todos.unshift({ id: 't-' + Date.now(), text: val, tag: 'Ready', done: false });
+                renderChecklist();
+                toast('Added to Checklist');
+            } else {
+                const sp = state.spreads[state.currentSpread];
+                sp.left.text = (sp.left.text ? sp.left.text + '\n' : '') + val;
+                renderSpread();
+                toast('Added to Left Page');
+            }
+            box.value = '';
+            queueSave();
+        }
+
+        // =========================================================================
+        // 4. REAL-TIME POINTER-TRACKING 3D PAGE CURL & SPREAD ENGINE
+        // =========================================================================
+        let isCurling = false;
+
+        function applyNotebookStyling() {
+            const root = document.documentElement;
+            root.style.setProperty('--paper-bg', state.meta.paperColor || '#FFFFFF');
+            root.style.setProperty('--cover-color', state.meta.coverColor || '#1A1D24');
+            root.style.setProperty('--font-note', state.meta.fontFamily || `'Caveat', cursive`);
+            root.style.setProperty('--font-size-note', state.meta.fontSize || '26px');
+
+            document.getElementById('coverTitleInput').value = state.meta.title || 'Galaxy Z Fold 8 Journal';
+            updateUnderCoverPreview();
+
+            ['leftPageSheet', 'rightPageSheet', 'curlFrontSurface', 'curlBackSurface'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.remove('paper-ruled', 'paper-dotted', 'paper-grid', 'paper-blank');
+                el.classList.add('paper-' + (state.meta.paperStyle || 'ruled'));
+            });
+        }
+
+        function updateMeta(key, value, optionalSize) {
+            state.meta[key] = value;
+            if (optionalSize) state.meta.fontSize = optionalSize;
+            applyNotebookStyling();
+            queueSave();
+        }
+
+        function renderSpread() {
+            const sp = state.spreads[state.currentSpread];
+            if (!sp) return;
+
+            const leftNum = state.currentSpread * 2 + 1;
+            const rightNum = leftNum + 1;
+
+            document.getElementById('leftPageNumber').textContent = String(leftNum).padStart(2, '0');
+            document.getElementById('rightPageNumber').textContent = String(rightNum).padStart(2, '0');
+            document.getElementById('pillSpreadLabel').textContent = `${leftNum}–${rightNum}`;
+
+            document.getElementById('leftTitleInput').value = sp.left.title || '';
+            document.getElementById('leftNoteArea').value = sp.left.text || '';
+            document.getElementById('rightTitleInput').value = sp.right.title || '';
+            document.getElementById('rightNoteArea').value = sp.right.text || '';
+
+            const ribbon = document.getElementById('centerSilkRibbon');
+            if (ribbon) {
+                ribbon.className = sp.bookmarked
+                    ? 'w-7 h-14 bg-gradient-to-b from-red-900 via-red-600 to-red-800 shadow-lg flex items-start justify-center pt-1.5 transition-all duration-200'
+                    : 'w-7 h-10 bg-gradient-to-b from-red-900 via-red-700 to-red-800 shadow-md flex items-start justify-center pt-1.5 transition-all duration-200';
+            }
+
+            drawSavedInk('left', sp.left.ink);
+            drawSavedInk('right', sp.right.ink);
+
+            renderWidgets('left', sp.left.widgets || []);
+            renderWidgets('right', sp.right.widgets || []);
+
+            switchRightPageMode(state.rightMode || 'todo', true);
+            updateVaultStats();
+        }
+
+        function focusPageEditor(side, e) {
+            if (currentTool !== 'text') return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+            if (side === 'left') {
+                const ta = document.getElementById('leftNoteArea');
+                ta.focus();
+                placeCursorAtTappedLine(ta, 'left', e);
+            } else if (state.rightMode === 'note') {
+                const ta = document.getElementById('rightNoteArea');
+                ta.focus();
+                placeCursorAtTappedLine(ta, 'right', e);
+            }
+        }
+
+        function placeCursorAtTappedLine(textarea, side, e) {
+            if (currentTool !== 'text' || !textarea) return;
+            const rect = textarea.getBoundingClientRect();
+            const lineHeight = 36;
+            const clickY = (e.clientY - rect.top) + textarea.scrollTop;
+            const targetLine = Math.max(0, Math.floor(clickY / lineHeight));
+
+            const lines = textarea.value.split('\n');
+            if (targetLine >= lines.length) {
+                const neededNewlines = targetLine - lines.length + 1;
+                recordUndoSnapshot(false);
+                textarea.value += '\n'.repeat(neededNewlines);
+                const sp = state.spreads[state.currentSpread];
+                if (sp) {
+                    sp[side].text = textarea.value;
+                    queueSave();
+                }
+                const endPos = textarea.value.length;
+                requestAnimationFrame(() => {
+                    textarea.setSelectionRange(endPos, endPos);
+                });
+            }
+        }
+
+        function updatePageField(side, field, value) {
+            const sp = state.spreads[state.currentSpread];
+            if (!sp) return;
+            recordUndoSnapshot(false);
+            sp[side][field] = value;
+            queueSave();
+        }
+
+        function switchRightPageMode(mode, skipSave = false) {
+            state.rightMode = mode;
+            const noteArea = document.getElementById('rightNoteArea');
+            const todoView = document.getElementById('rightChecklistView');
+            const btnNote = document.getElementById('modeBtnNote');
+            const btnTodo = document.getElementById('modeBtnTodo');
+
+            if (mode === 'todo') {
+                noteArea.classList.add('hidden');
+                todoView.classList.remove('hidden');
+                btnTodo.className = 'text-xs px-2.5 py-0.5 rounded-full border border-stone-800 bg-stone-800 text-amber-100 transition';
+                btnNote.className = 'text-xs px-2.5 py-0.5 rounded-full border border-stone-400/50 text-stone-700 hover:bg-stone-800/10 transition';
+            } else {
+                todoView.classList.add('hidden');
+                noteArea.classList.remove('hidden');
+                btnNote.className = 'text-xs px-2.5 py-0.5 rounded-full border border-stone-800 bg-stone-800 text-amber-100 transition';
+                btnTodo.className = 'text-xs px-2.5 py-0.5 rounded-full border border-stone-400/50 text-stone-700 hover:bg-stone-800/10 transition';
+            }
+            if (!skipSave) queueSave();
+        }
+
+        function ensureSpreadExists(targetIdx) {
+            if (targetIdx >= state.spreads.length) {
+                const n = state.spreads.length + 1;
+                state.spreads.push({
+                    bookmarked: false,
+                    left: { title: `Page ${n * 2 - 1} Notes`, text: '', ink: null, widgets: [] },
+                    right: { title: `Page ${n * 2} Notes`, text: '', ink: null, widgets: [] }
+                });
+            }
+        }
+
+        function populateCurlFaces(direction, targetIdx) {
+            const curr = state.spreads[state.currentSpread];
+            const next = state.spreads[targetIdx];
+            const front = document.getElementById('curlFrontSurface');
+            const back = document.getElementById('curlBackSurface');
+
+            const formatChecklistPreview = () => {
+                return state.todos.slice(0, 7).map(t =>
+                    `<div class="py-0.5">${t.done ? '☑' : '☐'} <span class="${t.done ? 'line-through opacity-50' : ''}">${escapeStr(t.text)}</span></div>`
+                ).join('');
+            };
+
+            const currRightBody = state.rightMode === 'todo'
+                ? formatChecklistPreview()
+                : escapeStr(curr.right.text);
+
+            const nextRightBody = state.rightMode === 'todo'
+                ? formatChecklistPreview()
+                : escapeStr(next.right.text);
+
+            if (direction > 0) {
+                front.innerHTML = `
+                    <div class="handwriting-area font-bold text-2xl sm:text-3xl border-b border-stone-400/30 pb-2 mb-3 flex justify-between">
+                        <span>${escapeStr(curr.right.title)}</span>
+                        <span class="text-xs font-mono text-stone-400">${String(state.currentSpread * 2 + 2).padStart(2, '0')}</span>
+                    </div>
+                    <div class="handwriting-area whitespace-pre-line">${currRightBody}</div>
+                `;
+                back.innerHTML = `
+                    <div class="handwriting-area font-bold text-2xl sm:text-3xl border-b border-stone-400/30 pb-2 mb-3 flex justify-between">
+                        <span>${escapeStr(next.left.title)}</span>
+                        <span class="text-xs font-mono text-stone-400">${String(targetIdx * 2 + 1).padStart(2, '0')}</span>
+                    </div>
+                    <div class="handwriting-area whitespace-pre-line">${escapeStr(next.left.text)}</div>
+                `;
+            } else {
+                front.innerHTML = `
+                    <div class="handwriting-area font-bold text-2xl sm:text-3xl border-b border-stone-400/30 pb-2 mb-3 flex justify-between">
+                        <span>${escapeStr(curr.left.title)}</span>
+                        <span class="text-xs font-mono text-stone-400">${String(state.currentSpread * 2 + 1).padStart(2, '0')}</span>
+                    </div>
+                    <div class="handwriting-area whitespace-pre-line">${escapeStr(curr.left.text)}</div>
+                `;
+                back.innerHTML = `
+                    <div class="handwriting-area font-bold text-2xl sm:text-3xl border-b border-stone-400/30 pb-2 mb-3 flex justify-between">
+                        <span>${escapeStr(next.right.title)}</span>
+                        <span class="text-xs font-mono text-stone-400">${String(targetIdx * 2 + 2).padStart(2, '0')}</span>
+                    </div>
+                    <div class="handwriting-area whitespace-pre-line">${nextRightBody}</div>
+                `;
+            }
+        }
+
+        function startInteractivePageCurl(e, direction) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (isCurling) return;
+
+            const targetIdx = state.currentSpread + direction;
+            if (targetIdx < 0) {
+                toggleCoverView(true);
+                return;
+            }
+            ensureSpreadExists(targetIdx);
+
+            const leaf = document.getElementById('curlLeafOverlay');
+            const shadow = document.getElementById('curlCastShadow');
+            populateCurlFaces(direction, targetIdx);
+
+            leaf.classList.remove('hidden');
+            leaf.style.transition = 'none';
+            if (shadow) shadow.style.opacity = '0.35';
+
+            if (direction > 0) {
+                leaf.style.right = '0';
+                leaf.style.left = 'auto';
+                leaf.style.transformOrigin = 'left center';
+                leaf.style.transform = 'rotateY(-14deg) skewY(-1.5deg)';
+            } else {
+                leaf.style.left = '0';
+                leaf.style.right = 'auto';
+                leaf.style.transformOrigin = 'right center';
+                leaf.style.transform = 'rotateY(14deg) skewY(1.5deg)';
+            }
+
+            const startX = e.clientX;
+            const startY = e.clientY;
+            const stageWidth = Math.max(window.innerWidth, 320);
+            let isDragging = false;
+            let currentAngle = direction > 0 ? -14 : 14;
+
+            const onPointerMove = (ev) => {
+                const dx = ev.clientX - startX;
+                const dy = ev.clientY - startY;
+
+                if (!isDragging && Math.hypot(dx, dy) > 10) {
+                    isDragging = true;
+                    playPageRustle();
+                }
+                if (!isDragging) return;
+
+                const ratio = Math.max(0, Math.min(1, ev.clientX / stageWidth));
+                if (direction > 0) {
+                    currentAngle = -Math.max(8, Math.min(176, (1 - ratio) * 185));
+                } else {
+                    currentAngle = Math.max(8, Math.min(176, ratio * 185));
+                }
+
+                const bendSkew = Math.sin((Math.abs(currentAngle) / 180) * Math.PI) * (direction > 0 ? -3.2 : 3.2);
+                leaf.style.transform = `rotateY(${currentAngle}deg) skewY(${bendSkew.toFixed(2)}deg)`;
+                if (shadow) {
+                    shadow.style.opacity = String(0.15 + Math.sin((Math.abs(currentAngle) / 180) * Math.PI) * 0.65);
+                }
+            };
+
+            const finishGesture = () => {
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', finishGesture);
+                window.removeEventListener('pointercancel', finishGesture);
+
+                if (!isDragging) {
+                    leaf.classList.add('hidden');
+                    if (shadow) shadow.style.opacity = '0';
+                    triggerSmoothPageTurn(direction);
+                    return;
+                }
+
+                isCurling = true;
+                const shouldComplete = Math.abs(currentAngle) > 32;
+                leaf.style.transition = 'transform 0.48s cubic-bezier(0.22, 1, 0.36, 1)';
+                leaf.style.transform = shouldComplete
+                    ? `rotateY(${direction > 0 ? -180 : 180}deg) skewY(0deg)`
+                    : 'rotateY(0deg) skewY(0deg)';
+                if (shadow) shadow.style.opacity = '0';
+
+                setTimeout(() => {
+                    if (shouldComplete) {
+                        state.currentSpread = targetIdx;
+                        renderSpread();
+                        queueSave();
+                    }
+                    leaf.classList.add('hidden');
+                    isCurling = false;
+                }, 490);
+            };
+
+            window.addEventListener('pointermove', onPointerMove);
+            window.addEventListener('pointerup', finishGesture);
+            window.addEventListener('pointercancel', finishGesture);
+        }
+
+        function triggerSmoothPageTurn(direction) {
+            if (isCurling) return;
+            const targetIdx = state.currentSpread + direction;
+            if (targetIdx < 0) {
+                toggleCoverView(true);
+                return;
+            }
+            ensureSpreadExists(targetIdx);
+            isCurling = true;
+            playPageRustle();
+
+            const leaf = document.getElementById('curlLeafOverlay');
+            const shadow = document.getElementById('curlCastShadow');
+            populateCurlFaces(direction, targetIdx);
+
+            leaf.classList.remove('hidden');
+            leaf.style.transition = 'none';
+            if (shadow) shadow.style.opacity = '0.6';
+
+            if (direction > 0) {
+                leaf.style.right = '0';
+                leaf.style.left = 'auto';
+                leaf.style.transformOrigin = 'left center';
+                leaf.style.transform = 'rotateY(0deg) skewY(0deg)';
+            } else {
+                leaf.style.left = '0';
+                leaf.style.right = 'auto';
+                leaf.style.transformOrigin = 'right center';
+                leaf.style.transform = 'rotateY(0deg) skewY(0deg)';
+            }
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    leaf.style.transition = 'transform 0.64s cubic-bezier(0.25, 0.9, 0.25, 1)';
+                    leaf.style.transform = `rotateY(${direction > 0 ? -180 : 180}deg) skewY(0deg)`;
+                    if (shadow) shadow.style.opacity = '0';
+                });
+            });
+
+            setTimeout(() => {
+                state.currentSpread = targetIdx;
+                renderSpread();
+                leaf.classList.add('hidden');
+                isCurling = false;
+                queueSave();
+            }, 650);
+        }
+
+        // =========================================================================
+        // 5. PEN & FINGER INK DRAWING LAYER
+        // =========================================================================
+        function initCanvases() {
+            ['left', 'right'].forEach(side => {
+                const canvas = document.getElementById(side + 'InkCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let drawing = false;
+                let prev = { x: 0, y: 0 };
+
+                canvas.addEventListener('pointerdown', (e) => {
+                    if (currentTool === 'text') return;
+                    e.stopPropagation();
+                    recordUndoSnapshot(true);
+                    drawing = true;
+                    const r = canvas.getBoundingClientRect();
+                    prev = { x: e.clientX - r.left, y: e.clientY - r.top };
+                    canvas.setPointerCapture(e.pointerId);
+                });
+
+                canvas.addEventListener('pointermove', (e) => {
+                    if (!drawing || currentTool === 'text') return;
+                    const r = canvas.getBoundingClientRect();
+                    const pt = { x: e.clientX - r.left, y: e.clientY - r.top };
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(prev.x, prev.y);
+                    ctx.lineTo(pt.x, pt.y);
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+
+                    if (currentTool === 'eraser') {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.lineWidth = 24;
+                    } else if (currentTool === 'marker') {
+                        ctx.globalCompositeOperation = 'multiply';
+                        ctx.strokeStyle = currentInkColor + '48';
+                        ctx.lineWidth = 18;
+                    } else {
+                        ctx.globalCompositeOperation = 'source-over';
+                        ctx.strokeStyle = currentInkColor;
+                        ctx.lineWidth = e.pressure ? Math.max(1.6, e.pressure * 4.8) : 2.5;
+                    }
+                    ctx.stroke();
+                    ctx.restore();
+                    prev = pt;
+                });
+
+                canvas.addEventListener('pointerup', () => {
+                    if (!drawing) return;
+                    drawing = false;
+                    state.spreads[state.currentSpread][side].ink = canvas.toDataURL('image/png');
+                    queueSave();
+                });
+            });
+
+            resizeCanvases();
+            window.addEventListener('resize', resizeCanvases);
+        }
+
+        function resizeCanvases() {
+            ['left', 'right'].forEach(side => {
+                const c = document.getElementById(side + 'InkCanvas');
+                if (!c || !c.parentElement) return;
+                const rect = c.parentElement.getBoundingClientRect();
+                if (!rect.width || !rect.height) return;
+                const saved = state.spreads[state.currentSpread]?.[side]?.ink;
+                c.width = rect.width;
+                c.height = rect.height;
+                if (saved) drawSavedInk(side, saved);
+            });
+        }
+
+        function drawSavedInk(side, dataUrl) {
+            const c = document.getElementById(side + 'InkCanvas');
+            if (!c) return;
+            const ctx = c.getContext('2d');
+            ctx.clearRect(0, 0, c.width, c.height);
+            if (!dataUrl) return;
+            const img = new Image();
+            img.onload = () => ctx.drawImage(img, 0, 0, c.width, c.height);
+            img.src = dataUrl;
+        }
+
+        function selectNotebookTool(tool) {
+            currentTool = tool;
+            ['Text', 'Pen', 'Marker', 'Eraser'].forEach(name => {
+                const btn = document.getElementById('pillTool' + name);
+                if (!btn) return;
+                btn.className = name.toLowerCase() === tool
+                    ? 'px-2.5 py-1 rounded-full text-xs font-medium bg-amber-400 text-stone-950 transition flex items-center gap-1 shrink-0'
+                    : 'px-2.5 py-1 rounded-full text-xs font-medium text-stone-300 hover:text-white transition flex items-center gap-1 shrink-0';
+            });
+            ['leftInkCanvas', 'rightInkCanvas'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.toggle('pointer-events-none', tool === 'text');
+                el.style.cursor = tool === 'text' ? 'default' : 'crosshair';
+            });
+            const lbl = document.getElementById('bottomHandleModeLabel');
+            if (lbl) {
+                const names = { text: 'Type', pen: 'Draw', marker: 'Highlight', eraser: 'Rubber' };
+                lbl.textContent = names[tool] || 'Pen Bar';
+            }
+        }
+
+        function selectInkSwatch(color) {
+            currentInkColor = color;
+            document.querySelectorAll('.ink-dot').forEach(dot => {
+                dot.classList.toggle('ring-2', dot.getAttribute('data-color') === color);
+                dot.classList.toggle('ring-amber-400', dot.getAttribute('data-color') === color);
+            });
+            if (currentTool === 'text' || currentTool === 'eraser') selectNotebookTool('pen');
+        }
+
+        function clearSpreadInk() {
+            recordUndoSnapshot(true);
+            const sp = state.spreads[state.currentSpread];
+            sp.left.ink = null;
+            sp.right.ink = null;
+            drawSavedInk('left', null);
+            drawSavedInk('right', null);
+            queueSave();
+            closeModal('customizerModal');
+            toast('Erased ink on current spread');
+        }
+
+        // =========================================================================
+        // 6. HANDWRITTEN CHECKLIST ENGINE
+        // =========================================================================
+        function renderChecklist() {
+            const list = document.getElementById('handwrittenTodoList');
+            if (!list) return;
+
+            list.innerHTML = state.todos.map(t => `
+                <li class="group flex items-center justify-between gap-2 py-0.5 px-1 rounded-lg hover:bg-stone-900/5 transition" style="min-height: 36px;">
+                    <label class="flex items-center gap-2.5 flex-1 cursor-pointer">
+                        <button onclick="toggleTaskDone('${t.id}')" class="text-xl text-stone-700 hover:text-stone-950 font-bold w-6 text-left">
+                            ${t.done ? '☑' : '☐'}
+                        </button>
+                        <span class="handwriting-area ${t.done ? 'line-through opacity-45' : ''}">${escapeStr(t.text)}</span>
+                    </label>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[11px] px-2 py-0.5 rounded-full border border-stone-400/50 text-stone-600">${escapeStr(t.tag)}</span>
+                        <button onclick="deleteTask('${t.id}')" class="opacity-0 group-hover:opacity-100 text-stone-400 hover:text-rose-700 px-1">✕</button>
+                    </div>
+                </li>
+            `).join('');
+            updateVaultStats();
+        }
+
+        function addChecklistTask() {
+            const input = document.getElementById('newTaskInput');
+            const cat = document.getElementById('newTaskCategory');
+            const text = input.value.trim();
+            if (!text) return;
+            recordUndoSnapshot(true);
+            state.todos.unshift({ id: 't-' + Date.now(), text, tag: cat.value, done: false });
+            input.value = '';
+            renderChecklist();
+            queueSave();
+        }
+
+        function toggleTaskDone(id) {
+            const item = state.todos.find(x => x.id === id);
+            if (!item) return;
+            recordUndoSnapshot(true);
+            item.done = !item.done;
+            renderChecklist();
+            queueSave();
+        }
+
+        function deleteTask(id) {
+            recordUndoSnapshot(true);
+            state.todos = state.todos.filter(x => x.id !== id);
+            renderChecklist();
+            queueSave();
+        }
+
+        // =========================================================================
+        // 7. TAPED MINI WEBPAGE & INTERACTIVE PDF CLIPPINGS
+        // =========================================================================
+        function openInsertModal(side, type) {
+            setInsertSide(side);
+            document.getElementById('webInsertPane').classList.toggle('hidden', type === 'pdf');
+            document.getElementById('pdfInsertPane').classList.toggle('hidden', type !== 'pdf');
+            openModal('insertMediaModal');
+        }
+
+        function setInsertSide(side) {
+            insertTargetSide = side;
+            document.getElementById('targetBtnLeft').className = side === 'left'
+                ? 'py-2 rounded-xl bg-stone-800 text-amber-100 font-bold'
+                : 'py-2 rounded-xl bg-stone-200 text-stone-700 font-bold';
+            document.getElementById('targetBtnRight').className = side === 'right'
+                ? 'py-2 rounded-xl bg-stone-800 text-amber-100 font-bold'
+                : 'py-2 rounded-xl bg-stone-200 text-stone-700 font-bold';
+        }
+
+        function insertLiveWebClipping() {
+            let url = document.getElementById('webUrlField').value.trim() || 'https://en.m.wikipedia.org/wiki/Foldable_smartphone';
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+            let host = 'Web Clipping';
+            try { host = new URL(url).hostname; } catch (e) {}
+
+            const sp = state.spreads[state.currentSpread];
+            sp[insertTargetSide].widgets.push({
+                id: 'w-' + Date.now(),
+                type: 'url',
+                title: host,
+                url,
+                x: 30,
+                y: 130,
+                width: 310,
+                height: 205
+            });
+            closeModal('insertMediaModal');
+            renderSpread();
+            queueSave();
+            toast(`Taped ${host} to ${insertTargetSide} page`);
+        }
+
+        function handlePdfFileSelected(e) {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const sp = state.spreads[state.currentSpread];
+                sp[insertTargetSide].widgets.push({
+                    id: 'w-' + Date.now(),
+                    type: 'pdf-real',
+                    title: file.name,
+                    dataUrl: ev.target.result,
+                    page: 1,
+                    x: 32,
+                    y: 110,
+                    width: 300,
+                    height: 230
+                });
+                closeModal('insertMediaModal');
+                renderSpread();
+                queueSave();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function insertSamplePdfClipping() {
+            const sp = state.spreads[state.currentSpread];
+            sp[insertTargetSide].widgets.push({
+                id: 'w-' + Date.now(),
+                type: 'pdf-sample',
+                title: 'Fold8_Field_Spec.pdf',
+                page: 1,
+                pages: [
+                    `FIELD BRIEF (1/3)\n-----------------\nFull-Bleed Paper Mode active.\nDrag the top washi-tape strip to reposition this PDF anywhere on the page.`,
+                    `STORAGE SPEC (2/3)\n------------------\nAll handwritten notes, ink strokes, and clippings are persisted inside your browser's IndexedDB.`,
+                    `AI INTEGRATION (3/3)\n--------------------\nUse the Gemini AI tab on the top paper edge to chat with your notebook or extract checklist items.`
+                ],
+                x: 36,
+                y: 120,
+                width: 295,
+                height: 205
+            });
+            closeModal('insertMediaModal');
+            renderSpread();
+            queueSave();
+            toast('Taped Sample PDF onto page');
+        }
+
+        function renderWidgets(side, widgets) {
+            const box = document.getElementById(side + 'WidgetsContainer');
+            if (!box) return;
+            box.innerHTML = '';
+
+            widgets.forEach(w => {
+                const el = document.createElement('div');
+                el.className = 'taped-clipping absolute bg-[#FDFBF7] rounded-xl flex flex-col pointer-events-auto border border-stone-300';
+                el.style.left = (w.x || 24) + 'px';
+                el.style.top = (w.y || 120) + 'px';
+                el.style.width = (w.width || 300) + 'px';
+                el.style.height = (w.height || 200) + 'px';
+
+                if (w.type === 'url') {
+                    el.innerHTML = `
+                        <div class="washi-tape absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 pointer-events-none"></div>
+                        <div class="drag-bar px-2.5 py-1 bg-stone-200/90 border-b border-stone-300 text-[11px] text-stone-700 flex items-center justify-between cursor-move rounded-t-xl">
+                            <span class="font-bold truncate">🌐 ${escapeStr(w.title)}</span>
+                            <div class="flex items-center gap-1.5">
+                                <a href="${escapeStr(w.url)}" target="_blank" rel="noopener" class="hover:text-stone-950">↗</a>
+                                <button onclick="deleteWidget('${side}', '${w.id}')" class="hover:text-rose-700 font-bold">✕</button>
+                            </div>
+                        </div>
+                        <iframe src="${escapeStr(w.url)}" class="w-full flex-1 border-0 rounded-b-xl bg-white" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+                        <div class="clipping-resize-handle" title="Drag corner to resize clipping"></div>
+                    `;
+                } else if (w.type === 'pdf-sample') {
+                    const p = (w.page || 1) - 1;
+                    el.innerHTML = `
+                        <div class="washi-tape absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 pointer-events-none"></div>
+                        <div class="drag-bar px-2.5 py-1 bg-rose-100 border-b border-rose-200 text-[11px] text-rose-950 flex items-center justify-between cursor-move rounded-t-xl">
+                            <span class="font-bold truncate">📄 ${escapeStr(w.title)}</span>
+                            <div class="flex items-center gap-1">
+                                <button onclick="turnPdfClipPage('${side}','${w.id}',-1)" class="px-1 rounded bg-white/60">‹</button>
+                                <span class="font-mono text-[10px]">${w.page || 1}/${w.pages.length}</span>
+                                <button onclick="turnPdfClipPage('${side}','${w.id}',1)" class="px-1 rounded bg-white/60">›</button>
+                                <button onclick="deleteWidget('${side}', '${w.id}')" class="ml-1 hover:text-rose-700 font-bold">✕</button>
+                            </div>
+                        </div>
+                        <div class="flex-1 p-3 font-mono text-xs text-stone-800 whitespace-pre-line overflow-y-auto">${escapeStr(w.pages[p] || w.pages[0])}</div>
+                        <div class="clipping-resize-handle" title="Drag corner to resize clipping"></div>
+                    `;
+                } else if (w.type === 'pdf-real') {
+                    const cid = 'pdfc-' + w.id;
+                    el.innerHTML = `
+                        <div class="washi-tape absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 pointer-events-none"></div>
+                        <div class="drag-bar px-2.5 py-1 bg-rose-100 border-b border-rose-200 text-[11px] text-rose-950 flex items-center justify-between cursor-move rounded-t-xl">
+                            <span class="font-bold truncate">📄 ${escapeStr(w.title)}</span>
+                            <div class="flex items-center gap-1">
+                                <button onclick="turnPdfClipPage('${side}','${w.id}',-1)" class="px-1 rounded bg-white/60">‹</button>
+                                <span id="pdfl-${w.id}" class="font-mono text-[10px]">P.${w.page || 1}</span>
+                                <button onclick="turnPdfClipPage('${side}','${w.id}',1)" class="px-1 rounded bg-white/60">›</button>
+                                <button onclick="deleteWidget('${side}', '${w.id}')" class="ml-1 hover:text-rose-700 font-bold">✕</button>
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-stone-100 overflow-auto flex items-center justify-center p-1 rounded-b-xl">
+                            <canvas id="${cid}" class="max-w-full h-auto shadow"></canvas>
+                        </div>
+                        <div class="clipping-resize-handle" title="Drag corner to resize clipping"></div>
+                    `;
+                    setTimeout(() => renderUploadedPdf(w, cid), 30);
+                }
+
+                attachWidgetDrag(el, w);
+                attachWidgetResize(el, w);
+                box.appendChild(el);
+            });
+        }
+
+        async function renderUploadedPdf(w, canvasId) {
+            if (!window.pdfjsLib || !w.dataUrl) return;
+            try {
+                const pdf = await window.pdfjsLib.getDocument(w.dataUrl).promise;
+                w.totalPages = pdf.numPages;
+                w.page = Math.min(Math.max(1, w.page || 1), pdf.numPages);
+                const lbl = document.getElementById('pdfl-' + w.id);
+                if (lbl) lbl.textContent = `${w.page}/${pdf.numPages}`;
+                const page = await pdf.getPage(w.page);
+                const vp = page.getViewport({ scale: 0.8 });
+                const c = document.getElementById(canvasId);
+                if (!c) return;
+                c.width = vp.width;
+                c.height = vp.height;
+                await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+            } catch (e) {}
+        }
+
+        function turnPdfClipPage(side, id, delta) {
+            const sp = state.spreads[state.currentSpread];
+            const w = sp[side].widgets.find(x => x.id === id);
+            if (!w) return;
+            const max = w.totalPages || (w.pages ? w.pages.length : 99);
+            w.page = Math.min(max, Math.max(1, (w.page || 1) + delta));
+            renderSpread();
+            queueSave();
+        }
+
+        function deleteWidget(side, id) {
+            recordUndoSnapshot(true);
+            const sp = state.spreads[state.currentSpread];
+            sp[side].widgets = sp[side].widgets.filter(x => x.id !== id);
+            renderSpread();
+            queueSave();
+        }
+
+        function attachWidgetDrag(el, w) {
+            const bar = el.querySelector('.drag-bar');
+            if (!bar) return;
+            let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+            bar.addEventListener('pointerdown', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+                e.stopPropagation();
+                dragging = true;
+                sx = e.clientX; sy = e.clientY;
+                ox = w.x || 24; oy = w.y || 120;
+                bar.setPointerCapture(e.pointerId);
+            });
+            bar.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+                w.x = Math.max(4, ox + (e.clientX - sx));
+                w.y = Math.max(4, oy + (e.clientY - sy));
+                el.style.left = w.x + 'px';
+                el.style.top = w.y + 'px';
+            });
+            bar.addEventListener('pointerup', () => {
+                if (dragging) { dragging = false; queueSave(); }
+            });
+        }
+
+        function attachWidgetResize(el, w) {
+            const handle = el.querySelector('.clipping-resize-handle');
+            if (!handle) return;
+            let resizing = false, sx = 0, sy = 0, sw = 0, sh = 0;
+            handle.addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+                resizing = true;
+                sx = e.clientX;
+                sy = e.clientY;
+                sw = w.width || 300;
+                sh = w.height || 200;
+                handle.setPointerCapture(e.pointerId);
+            });
+            handle.addEventListener('pointermove', (e) => {
+                if (!resizing) return;
+                w.width = Math.max(180, sw + (e.clientX - sx));
+                w.height = Math.max(130, sh + (e.clientY - sy));
+                el.style.width = w.width + 'px';
+                el.style.height = w.height + 'px';
+            });
+            handle.addEventListener('pointerup', () => {
+                if (resizing) {
+                    resizing = false;
+                    queueSave();
+                }
+            });
+        }
+
+        // =========================================================================
+        // 8. GEMINI AI COMPANION
+        // =========================================================================
+        function toggleAIDrawer() {
+            document.getElementById('aiCompanionSheet').classList.toggle('translate-x-[115%]');
+        }
+
+        function saveVaultApiKey() {
+            state.meta.customApiKey = document.getElementById('vaultApiKeyInput').value.trim();
+            queueSave();
+            toast(state.meta.customApiKey ? 'Saved custom Gemini Key to IndexedDB' : 'Using default environment key');
+        }
+
+        async function requestGemini(promptText, schema = null) {
+            const key = state.meta.customApiKey?.trim() || "";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${key}`;
+            const payload = {
+                contents: [{ parts: [{ text: promptText }] }],
+                systemInstruction: { parts: [{ text: "You are a warm, concise assistant built into a physical notebook on the Samsung Galaxy Z Fold 8." }] }
+            };
+            if (schema) {
+                payload.generationConfig = { responseMimeType: "application/json", responseSchema: schema };
+            }
+            const delays = [1000, 2000, 4000];
+            for (let i = 0; i <= delays.length; i++) {
+                try {
+                    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!res.ok) throw new Error('API Error');
+                    const data = await res.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                } catch (e) {
+                    if (i === delays.length) throw e;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        }
+
+        function askGeminiPreset(q) {
+            const sheet = document.getElementById('aiCompanionSheet');
+            if (sheet.classList.contains('translate-x-[115%]')) sheet.classList.remove('translate-x-[115%]');
+            document.getElementById('aiPromptInput').value = q;
+            sendGeminiChat();
+        }
+
+        async function sendGeminiChat() {
+            const input = document.getElementById('aiPromptInput');
+            const q = input.value.trim();
+            if (!q) return;
+            input.value = '';
+
+            const box = document.getElementById('aiMessagesBox');
+            const userDiv = document.createElement('div');
+            userDiv.className = 'bg-amber-500/20 border border-amber-400/30 rounded-2xl p-3 ml-6 text-amber-100';
+            userDiv.textContent = q;
+            box.appendChild(userDiv);
+
+            const botDiv = document.createElement('div');
+            botDiv.className = 'bg-white/5 border border-white/10 rounded-2xl p-3.5 mr-4 text-stone-200 leading-relaxed';
+            botDiv.textContent = 'Reading your notebook pages...';
+            box.appendChild(botDiv);
+            box.scrollTop = box.scrollHeight;
+
+            const sp = state.spreads[state.currentSpread];
+            const tasks = state.todos.map(t => `- [${t.done ? 'x' : ' '}] ${t.text} (${t.tag})`).join('\n');
+            const ctx = `CURRENT SPREAD:\nLeft: ${sp.left.title}\n${sp.left.text}\nRight: ${sp.right.title}\n${sp.right.text}\n\nCHECKLIST:\n${tasks}\n\nUSER QUESTION: ${q}`;
+
+            try {
+                const reply = await requestGemini(ctx);
+                botDiv.innerHTML = `<div class="whitespace-pre-line">${escapeStr(reply)}</div>`;
+            } catch (e) {
+                botDiv.innerHTML = `<span class="text-rose-300">Could not reach Gemini. Add your API key in the IndexedDB Vault tab.</span>`;
+            }
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function extractTasksFromNotesAI() {
+            const sp = state.spreads[state.currentSpread];
+            const notes = `${sp.left.title}\n${sp.left.text}\n${sp.right.text}`.trim();
+            if (!notes) return toast('Write some notes on the page first');
+
+            toast('Gemini is extracting checklist items...');
+            const schema = {
+                type: "ARRAY",
+                items: {
+                    type: "OBJECT",
+                    properties: {
+                        task: { type: "STRING" },
+                        tag: { type: "STRING" }
+                    },
+                    propertyOrdering: ["task", "tag"]
+                }
+            };
+            try {
+                const raw = await requestGemini(`Extract 2 to 4 actionable tasks from these notes. Tag each as Ready, Research, or Waiting:\n\n${notes}`, schema);
+                const items = JSON.parse(raw);
+                if (Array.isArray(items)) {
+                    items.reverse().forEach(it => {
+                        state.todos.unshift({
+                            id: 't-' + Date.now() + Math.random().toString(36).slice(2, 5),
+                            text: it.task,
+                            tag: ['Ready', 'Research', 'Waiting'].includes(it.tag) ? it.tag : 'Ready',
+                            done: false
+                        });
+                    });
+                    switchRightPageMode('todo');
+                    renderChecklist();
+                    queueSave();
+                    toast(`Added ${items.length} tasks to your checklist`);
+                }
+            } catch (e) {
+                toast('Check your Gemini API Key in the Vault tab');
+            }
+        }
+
+        // =========================================================================
+        // 9. UTILITIES, EXPORT & INITIALIZATION
+        // =========================================================================
+        function openIndexModal() {
+            renderTableOfContents();
+            openModal('indexShareModal');
+            lucide.createIcons();
+        }
+
+        function renderTableOfContents() {
+            const list = document.getElementById('tocSpreadList');
+            if (!list) return;
+
+            list.innerHTML = state.spreads.map((sp, idx) => {
+                const isCurrent = idx === state.currentSpread;
+                const pLeft = idx * 2 + 1;
+                const pRight = pLeft + 1;
+                const titleLeft = sp.left.title?.trim() || `Page ${pLeft} Notes`;
+                const titleRight = sp.right.title?.trim() || (state.rightMode === 'todo' ? 'Action Checklist' : `Page ${pRight} Notes`);
+                const snippet = (sp.left.text || sp.right.text || 'Empty note spread...').replace(/\n+/g, ' ').slice(0, 90);
+
+                return `
+                    <div onclick="jumpToSpread(${idx})"
+                         class="group cursor-pointer p-3 rounded-2xl border transition flex items-start justify-between gap-3 ${
+                             isCurrent
+                                 ? 'bg-stone-900 text-amber-100 border-stone-900 shadow-md'
+                                 : 'bg-white/80 hover:bg-white text-stone-900 border-stone-300'
+                         }">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-mono px-2 py-0.5 rounded-full ${
+                                    isCurrent ? 'bg-amber-400 text-stone-950 font-bold' : 'bg-stone-200 text-stone-700'
+                                }">P. ${pLeft}–${pRight}</span>
+                                ${sp.bookmarked ? '<span class="text-rose-500 text-xs" title="Bookmarked Spread">🔖</span>' : ''}
+                                <span class="font-bold text-sm truncate">${escapeStr(titleLeft)} <span class="opacity-50 font-normal">/ ${escapeStr(titleRight)}</span></span>
+                            </div>
+                            <p class="text-xs mt-1 truncate ${isCurrent ? 'text-stone-300' : 'text-stone-500'}">${escapeStr(snippet)}</p>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            ${state.spreads.length > 1 ? `
+                                <button onclick="deleteNoteSpread(${idx}, event)"
+                                    class="p-1.5 rounded-lg opacity-60 hover:opacity-100 hover:bg-rose-500/20 hover:text-rose-400 transition"
+                                    title="Delete this spread">
+                                    ✕
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function jumpToSpread(targetIdx) {
+            closeModal('indexShareModal');
+            if (targetIdx === state.currentSpread) return;
+            playPageRustle();
+            state.currentSpread = targetIdx;
+            renderSpread();
+            queueSave();
+            toast(`Opened Pages ${targetIdx * 2 + 1}–${targetIdx * 2 + 2}`);
+        }
+
+        function createNewNoteSpread(fromModal = false) {
+            if (fromModal) closeModal('indexShareModal');
+            const newIdx = state.spreads.length;
+            const pageNum = newIdx * 2 + 1;
+            const dateStr = new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+            state.spreads.push({
+                bookmarked: false,
+                left: {
+                    title: `Notes • ${dateStr}`,
+                    text: '',
+                    ink: null,
+                    widgets: []
+                },
+                right: {
+                    title: `Section ${newIdx + 1} Companion`,
+                    text: '',
+                    ink: null,
+                    widgets: []
+                }
+            });
+
+            playPageRustle();
+            state.currentSpread = newIdx;
+            renderSpread();
+            queueSave();
+            toast(`Created Page ${pageNum}–${pageNum + 1}`);
+            setTimeout(() => document.getElementById('leftTitleInput')?.focus(), 120);
+        }
+
+        function deleteNoteSpread(idx, e) {
+            e.stopPropagation();
+            if (state.spreads.length <= 1) return;
+            state.spreads.splice(idx, 1);
+            if (state.currentSpread >= state.spreads.length) {
+                state.currentSpread = state.spreads.length - 1;
+            }
+            renderSpread();
+            renderTableOfContents();
+            queueSave();
+            toast('Note section removed');
+        }
+
+        function buildFormattedExport(format = 'md', scope = 'current') {
+            const isMd = format === 'md';
+            const lines = [];
+            const bookTitle = state.meta.title || 'Galaxy Z Fold 8 Journal';
+
+            if (isMd) {
+                lines.push(`# ${bookTitle}`);
+                lines.push(`*Exported from FoldFolio*`);
+                lines.push('');
+            } else {
+                lines.push(bookTitle.toUpperCase());
+                lines.push('='.repeat(bookTitle.length));
+                lines.push('');
+            }
+
+            const spreadsToInclude = scope === 'all'
+                ? state.spreads.map((sp, i) => ({ sp, idx: i }))
+                : [{ sp: state.spreads[state.currentSpread], idx: state.currentSpread }];
+
+            spreadsToInclude.forEach(({ sp, idx }) => {
+                if (!sp) return;
+                const pL = idx * 2 + 1;
+                const pR = pL + 1;
+                const leftTitle = sp.left.title || `Page ${pL}`;
+                const rightTitle = sp.right.title || `Page ${pR}`;
+
+                if (isMd) {
+                    lines.push(`## [Page ${pL}] ${leftTitle}`);
+                    lines.push(sp.left.text?.trim() || '*(No text notes)*');
+                    if (sp.left.widgets?.length) {
+                        lines.push('');
+                        sp.left.widgets.forEach(w => lines.push(`- 📎 Clipping: **${w.title}** ${w.url ? `(${w.url})` : ''}`));
+                    }
+                    lines.push('');
+                    lines.push(`## [Page ${pR}] ${rightTitle}`);
+                    if (state.rightMode === 'todo' && scope === 'current') {
+                        state.todos.forEach(t => lines.push(`- [${t.done ? 'x' : ' '}] ${t.text} *(${t.tag})*`));
+                    } else {
+                        lines.push(sp.right.text?.trim() || '*(No text notes)*');
+                    }
+                    lines.push('\n---\n');
+                } else {
+                    lines.push(`[PAGE ${pL}] ${leftTitle}`);
+                    lines.push('-'.repeat(28));
+                    lines.push(sp.left.text?.trim() || '(Empty)');
+                    lines.push('');
+                    lines.push(`[PAGE ${pR}] ${rightTitle}`);
+                    lines.push('-'.repeat(28));
+                    if (state.rightMode === 'todo' && scope === 'current') {
+                        state.todos.forEach(t => lines.push(`[${t.done ? 'x' : ' '}] ${t.text} (${t.tag})`));
+                    } else {
+                        lines.push(sp.right.text?.trim() || '(Empty)');
+                    }
+                    lines.push('\n====================================\n');
+                }
+            });
+
+            if (scope === 'all' && state.todos.length) {
+                if (isMd) {
+                    lines.push(`## Action Checklist`);
+                    state.todos.forEach(t => lines.push(`- [${t.done ? 'x' : ' '}] ${t.text} *(${t.tag})*`));
+                } else {
+                    lines.push(`ACTION CHECKLIST`);
+                    lines.push(`----------------`);
+                    state.todos.forEach(t => lines.push(`[${t.done ? 'x' : ' '}] ${t.text} (${t.tag})`));
+                }
+            }
+
+            return lines.join('\n');
+        }
+
+        function exportNotesFile(ext) {
+            const scope = document.getElementById('exportScopeSelect')?.value || 'current';
+            const content = buildFormattedExport(ext, scope);
+            const mime = ext === 'md' ? 'text/markdown;charset=utf-8' : 'text/plain;charset=utf-8';
+            const blob = new Blob([content], { type: mime });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const slug = (state.meta.title || 'foldfolio-notes').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            a.href = url;
+            a.download = `${slug}-${scope}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            toast(`Downloaded .${ext.toUpperCase()} file`);
+        }
+
+        function copyNotesToClipboard() {
+            const scope = document.getElementById('exportScopeSelect')?.value || 'current';
+            const content = buildFormattedExport('md', scope);
+            const ta = document.createElement('textarea');
+            ta.value = content;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                toast('Copied Markdown to clipboard');
+            } catch (e) {
+                toast('Could not copy');
+            }
+            ta.remove();
+        }
+
+        async function shareNotesNative() {
+            const scope = document.getElementById('exportScopeSelect')?.value || 'current';
+            const content = buildFormattedExport('md', scope);
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: state.meta.title || 'FoldFolio Notes',
+                        text: content
+                    });
+                    return;
+                } catch (e) {}
+            }
+            copyNotesToClipboard();
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            updateVaultStats();
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        let toastTimer = null;
+        function toast(msg) {
+            const el = document.getElementById('paperToast');
+            el.textContent = msg;
+            el.classList.replace('opacity-0', 'opacity-100');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.replace('opacity-100', 'opacity-0'), 2200);
+        }
+
+        function escapeStr(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        window.onload = async () => {
+            initBuiltInPWA();
+            lucide.createIcons();
+            await loadFromDB();
+            applyNotebookStyling();
+            renderSpread();
+            renderChecklist();
+            initCanvases();
+
+            // Attempt fullscreen immediately on load if preferred in IndexedDB,
+            // and fall back to first user interaction if browser requires a gesture.
+            if (state.meta.fullscreenPreferred !== false) {
+                autoRequestFoldFullscreen();
+                const ensureFsOnFirstTap = () => {
+                    if (state.meta.fullscreenPreferred !== false && !document.fullscreenElement) {
+                        autoRequestFoldFullscreen();
+                    }
+                    window.removeEventListener('pointerdown', ensureFsOnFirstTap);
+                };
+                window.addEventListener('pointerdown', ensureFsOnFirstTap, { once: true });
+            }
+
+            document.addEventListener('fullscreenchange', () => {
+                syncFullscreenIcons();
+                setTimeout(resizeCanvases, 200);
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                    const tag = document.activeElement?.tagName;
+                    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                        e.preventDefault();
+                        undoLastAction();
+                        return;
+                    }
+                }
+                const tag = document.activeElement?.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+                if (e.key === 'ArrowRight') triggerSmoothPageTurn(1);
+                if (e.key === 'ArrowLeft') triggerSmoothPageTurn(-1);
+            });
+        };
+    </script>
+</body>
+</html>
