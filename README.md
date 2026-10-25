@@ -23,7 +23,7 @@ Everything runs from a single `index.html` file with no build step, backend, or 
 Because the entire app is inside `index.html`, you can:
 - Open `index.html` directly in your browser.
 - Host it on GitHub Pages, Netlify, Vercel, or any static file server.
-- Access it directly at: 
+- Access it directly at: https://jimliddle.github.io/Zfold8-dual-pane-notebook/
 
 ### 2. Install as an App (PWA) on Galaxy Z Fold 8
 FoldFolio includes an embedded web manifest and icon so you can install it to your home screen:
