@@ -7,9 +7,9 @@ Everything runs from a single `index.html` file with no build step, backend, or 
 ## What It Does
 
 - **3D Cover & Elastic Strap:** Opens onto a closed hardcover book. Pull the elastic strap left or right (or swipe the cover) to snap it open. You can also jot quick notes or tasks straight from the closed cover.
-- Full** Fullc Sreen Dual-Page Spread:** Opens into a clean, two page spread with a center spine shadow and stacked paper edges. Both the top menu tabs and the bottom pen bar stay hidden by default so the screen looks like plain paper. Pull the top red ribbon or bottom pen tab to show the controls when you need them.
-- Page** PageTurn Physics & Sound:** Drag or tap the bottom page corners to curl pages back and forth across the crease, complete with synthesized paper and strap sounds.
-- Tap** TapAnywhere Writing & Pen Drawing:** Tap any line on the page to start typing right on that row, or switch to the Pen, Highlighter, and Rubber (eraser) tools to draw directly on the page. Includes multi step undo (`Ctrl+Z` or the Undo button).
+- **Full Screen Dual-Page Spread:** Opens into a clean, two page spread with a center spine shadow and stacked paper edges. Both the top menu tabs and the bottom pen bar stay hidden by default so the screen looks like plain paper. Pull the top red ribbon or bottom pen tab to show the controls when you need them.
+- **PageTurn Physics & Sound:** Drag or tap the bottom page corners to curl pages back and forth across the crease, complete with synthesized paper and strap sounds.
+- **TapAnywhere Writing & Pen Drawing:** Tap any line on the page to start typing right on that row, or switch to the Pen, Highlighter, and Rubber (eraser) tools to draw directly on the page. Includes multi step undo (`Ctrl+Z` or the Undo button).
 - **Notes & Checklists:** The left page is for freeform notes. The right page can switch between companion notes and an action checklist.
 - **Web & PDF Clippings:** Tape live, resizable mini webpages (`+Web`) or multi-page PDF files (`+PDF`) directly onto either page and drag them around your notes.
 - **Custom Paper, Covers & Fonts:** Pick from 5 cover colors, 4 paper stocks (white, cream, kraft, blueprint), 4 page layouts (lined, dotted, grid, blank), and 10 handwriting or book fonts.
